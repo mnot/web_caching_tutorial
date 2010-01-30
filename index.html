@@ -1,0 +1,1100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:hx="http://purl.org/NET/html_extensions">
+<head>
+  <title>Caching Tutorial for Web Authors and Webmasters</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  <link rel="contents" href="#TOC">
+  <link rel="copyright" href="#ABOUT">
+  <link rel="disclaimer" href="#ABOUT">
+  <link rel="author" href="mailto:mnot@pobox.com">
+  <link rev="made" href="mailto:mnot@pobox.com">
+  <link rel="bookmark" href="http://www.mnot.net/cache_docs/" title="Caching Tutorial for Web Authors and Webmasters">
+  <link rel="section" href="#DEFINITION" title="What's a Web Cache? Why do people use them?">
+  <link rel="section" href="#KINDS" title="Kinds of Web Caches">
+  <link rel="section" href="#WHY" title="Aren't Web Caches bad for me? Why should I help them?">
+  <link rel="section" href="#WORK" title="How Web Caches Work">
+  <link rel="section" href="#CONTROL" title="How (and how not) to Control Caches">
+  <link rel="section" href="#TIPS" title="Tips for Building a Cache-Aware Site">
+  <link rel="section" href="#SCRIPT" title="Writing Cache-Aware Scripts">
+  <link rel="section" href="#FAQ" title="Frequently Asked Questions">
+  <link rel="appendix" href="#IMP-SERVER" title="Implementation Notes - Web Servers">
+  <link rel="appendix" href="#IMP-SCRIPT" title="Implementation Notes - Server-Side Scripting">
+  <link rel="appendix" href="#REF" title="References and Further Information">
+  <!--base href="http://www.mnot.net/cache_docs/" /-->
+  <meta name="description"
+  content="Covers the how's and why's of Web caching for people who publish on the Web. With FAQs.">
+  <meta name="keywords"
+  content="FAQ, tutorial, Web cache, proxy, cache, Expires, Cache-Control, HTTP, headers, Last-Modified, ETag, HTTP/1.1, webmaster, Squid, Proxy Server, NetCache, CacheEngine">
+  <script type="text/javascript" src="/templates/hinclude.js" defer="defer"></script>
+</head>
+
+<body>
+<h1>Caching Tutorial</h1>
+<p class="subtitle">for Web Authors and Webmasters</p>
+
+<p class="banner">This is an informational document. Although technical in
+nature, it attempts to make the concepts involved understandable and
+applicable in real-world situations. Because of this, some aspects of the
+material are simplified or omitted, for the sake of clarity. If you are
+interested in the minutia of the subject, please explore the <a
+href="#REF">References and Further Information</a> at the end.</p>
+
+
+
+
+<a id="TOC" name="TOC"></a> 
+<ol class="TOC">
+  <li class="TOC"><a href="#DEFINITION">What&#8217;s a Web Cache? Why do people use
+    them?</a></li>
+  <li class="TOC"><a href="#KINDS">Kinds of Web Caches</a> 
+    <ol class="SUBTOC">
+      <li class="SUBTOC"><a href="#BROWSER">Browser Caches</a></li>
+      <li class="SUBTOC"><a href="#PROXY">Proxy Caches</a></li>
+    </ol>
+  </li>
+  <li class="TOC"><a href="#WHY">Aren&#8217;t Web Caches bad for me? Why should I
+    help them?</a></li>
+  <li class="TOC"><a href="#WORK">How Web Caches Work</a></li>
+  <li class="TOC"><a href="#CONTROL">How (and how not) to Control Caches</a> 
+    <ol class="SUBTOC">
+      <li class="SUBTOC"><a href="#META">HTML Meta Tags vs. HTTP
+      Headers</a></li>
+      <li class="SUBTOC"><a href="#PRAGMA">Pragma HTTP Headers (and why they
+        don&#8217;t work)</a></li>
+      <li class="SUBTOC"><a href="#EXPIRES">Controlling Freshness with the
+        Expires HTTP Header</a></li>
+      <li class="SUBTOC"><a href="#CACHE-CONTROL">Cache-Control HTTP
+        Headers</a></li>
+      <li class="SUBTOC"><a href="#VALIDATE">Validators and
+      Validation</a></li>
+    </ol>
+  </li>
+  <li class="TOC"><a href="#TIPS">Tips for Building a Cache-Aware
+  Site</a></li>
+  <li class="TOC"><a href="#SCRIPT">Writing Cache-Aware Scripts</a></li>
+  <li class="TOC"><a href="#FAQ">Frequently Asked Questions</a></li>
+  <li class="TOC"><a href="#IMP-SERVER">Implementation Notes &#8212; Web
+  Servers</a></li>
+  <li class="TOC"><a href="#IMP-SCRIPT">Implementation Notes &#8212; Server-Side
+    Scripting</a></li>
+  <li class="TOC"><a href="#REF">References and Further Information</a></li>
+  <li class="TOC"><a href="#ABOUT">About This Document</a></li>
+</ol>
+
+
+<p align="center" class="ad">
+<script type="text/javascript"><!--
+google_ad_client = "pub-6006191079307782";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+//2007-01-25: cache_tutorial
+google_ad_channel = "8065211203";
+google_color_border = "E9E9E9";
+google_color_bg = "FEFEFE";
+google_color_link = "3366AA";
+google_color_text = "333333";
+google_color_url = "003399";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</p>
+
+
+<h2><a id="DEFINITION" name="DEFINITION">What&#8217;s a Web Cache? Why do people
+use them?</a></h2>
+
+<p>A <em>Web cache</em> sits between one or more Web servers (also known as
+<em>origin servers</em>) and a client or many clients, and watches requests
+come by, saving copies of the responses &#8212; like HTML pages, images and files
+(collectively known as <em>representations</em>) &#8212; for itself. Then, if there
+is another request for the same URL, it can use the response that it has,
+instead of asking the origin server for it again.</p>
+
+<p>There are two main reasons that Web caches are used:</p>
+
+<ul>
+  <li>To <strong>reduce latency</strong> &#8212; Because the request is satisfied
+  from the cache (which is closer to the client) instead of the origin server,
+  it takes less time for it to get the representation and display it. This
+  makes the Web seem more responsive.</li>
+  <li>To <strong>reduce network traffic</strong> &#8212; Because representations are
+  reused, it reduces the amount of bandwidth used by a client. This saves
+  money if the client is paying for traffic, and keeps their bandwidth
+  requirements lower and more manageable.</li>
+</ul>
+
+<h2><a id="KINDS" name="KINDS">Kinds of Web Caches</a></h2>
+
+<h3><a id="BROWSER" name="BROWSER">Browser Caches</a></h3>
+
+<p>If you examine the preferences dialog of any modern Web browser (like
+Internet Explorer, Safari or Mozilla), you&#8217;ll probably notice a &#8220;cache&#8221;
+setting. This lets you set aside a section of your computer&#8217;s hard disk to
+store representations that you&#8217;ve seen, just for you. The browser cache works
+according to fairly simple rules. It will check to make sure that the
+representations are fresh, usually once a session (that is, the once in the
+current invocation of the browser).</p>
+
+<p>This cache is especially useful when users hit the &#8220;back&#8221; button or click a
+link to see a page they&#8217;ve just looked at. Also, if you use the same
+navigation images throughout your site, they&#8217;ll be served from browsers&#8217;
+caches almost instantaneously.</p>
+
+
+<h3><a id="PROXY" name="PROXY">Proxy Caches</a></h3>
+
+<p>Web proxy caches work on the same principle, but a much larger scale.
+Proxies serve hundreds or thousands of users in the same way; large
+corporations and ISPs often set them up on their firewalls, or as standalone
+devices (also known as <em>intermediaries</em>).</p>
+
+<p>Because proxy caches aren&#8217;t part of the client or the origin server, but
+instead are out on the network, requests have to be routed to them somehow.
+One way to do this is to use your browser&#8217;s proxy setting to manually tell it
+what proxy to use; another is using interception. <em>Interception
+proxies</em> have Web requests redirected to them by the underlying
+network itself, so that clients don&#8217;t need to be configured for them, or even
+know about them.</p>
+
+<p>Proxy caches are a type of <em>shared cache</em>; rather than just having
+one person using them, they usually have a large number of users, and because
+of this they are very good at reducing latency and network traffic. That&#8217;s
+because popular representations are reused a number of times.</p>
+
+
+<h3><a id="GATEWAY" name="GATEWAY">Gateway Caches</a></h3>
+
+<p>Also known as &#8220;reverse proxy caches&#8221; or &#8220;surrogate caches,&#8221; gateway caches
+are also intermediaries, but instead of being deployed by network
+administrators to save bandwidth, they&#8217;re typically deployed by Webmasters
+themselves, to make their sites more scalable, reliable and better
+performing.</p>
+
+<p>Requests can be routed to gateway caches by a number of methods, but
+typically some form of load balancer is used to make one or more of them look
+like the origin server to clients.</p>
+
+<p><em>Content delivery networks</em> (CDNs) distribute gateway caches
+throughout the Internet (or a part of it) and sell caching to interested Web
+sites. <a href="http://www.speedera.com/" class="offsite">Speedera</a> and <a
+href="http://www.akamai.com/" class="offsite">Akamai</a> are examples of
+CDNs.</p>
+
+<p>This tutorial focuses mostly on browser and proxy caches, although some of
+the information is suitable for those interested in gateway caches as
+well.</p>
+
+
+<h2><a id="WHY" name="WHY">Aren&#8217;t Web Caches bad for me? Why should I help
+them?</a></h2>
+
+<p>Web caching is one of the most misunderstood technologies on the Internet.
+Webmasters in particular fear losing control of their site, because a proxy
+cache can &#8220;hide&#8221; their users from them, making it difficult to see who&#8217;s using
+the site.</p>
+
+<p>Unfortunately for them, even if Web caches didn&#8217;t exist, there are too many
+variables on the Internet to assure that they&#8217;ll be able to get an accurate
+picture of how users see their site. If this is a big concern for you, this
+tutorial will teach you how to get the statistics you need without making your
+site cache-unfriendly.</p>
+
+<p>Another concern is that caches can serve content that is out of date, or
+<em>stale</em>. However, this tutorial can show you how to configure your
+server to control how your content is cached.</p>
+
+<p class="callout right"><acronym title="Content Delivery Networks">CDNs</acronym>
+are an interesting development, because unlike many 
+proxy caches, their gateway caches are aligned with the interests of the 
+Web site being cached, so that these problems aren&#8217;t seen. However, even
+when you use a CDN, you still have to consider that there will be proxy
+and browser caches downstream.</p>
+
+<p>On the other hand, if you plan your site well, caches can help your Web
+site load faster, and save load on your server and Internet link. The
+difference can be dramatic; a site that is difficult to cache may take
+several seconds to load, while one that takes advantage of caching can seem
+instantaneous in comparison. Users will appreciate a fast-loading site, and
+will visit more often.</p>
+
+<p>Think of it this way; many large Internet companies are spending millions
+of dollars setting up farms of servers around the world to replicate their
+content, in order to make it as fast to access as possible for their users.
+Caches do the same for you, and they&#8217;re even closer to the end user. Best of
+all, you don&#8217;t have to pay for them.</p>
+
+<p>The fact is that proxy and browser caches will be used whether you like it
+or not. If you don&#8217;t configure your site to be cached correctly, it will be
+cached using whatever defaults the cache&#8217;s administrator decides upon.</p>
+
+
+<h2><a id="WORK" name="WORK">How Web Caches Work</a></h2>
+
+<p>All caches have a set of rules that they use to determine when to serve a
+representation from the cache, if it&#8217;s available. Some of these rules are set
+in the protocols (HTTP 1.0 and 1.1), and some are set by the administrator of
+the cache (either the user of the browser cache, or the proxy
+administrator).</p>
+
+<p>Generally speaking, these are the most common rules that are followed
+(don&#8217;t worry if you don&#8217;t understand the details, it will be explained
+below):</p>
+
+<div class="ol">
+<ol>
+  <li>If the response&#8217;s headers tell the cache not to keep it,
+  it won&#8217;t.</li>
+  <li>If the request is authenticated or secure (i.e., HTTPS), it won&#8217;t be
+  cached.</li>
+  <li>A cached representation is considered <em>fresh</em> (that is, able to
+  be sent to a client without checking with the origin server) if:
+    <ul>
+      <li>It has an expiry time or other age-controlling header set, and is
+      still within the fresh period, or</li>
+      <li>If the cache has seen the representation recently, and it was
+      modified relatively long ago.</li>
+    </ul>
+    Fresh representations are served directly from the cache, without checking
+    with the origin server.</li>
+  <li>If an representation is stale, the origin server will be asked to
+  <em>validate</em> it, or tell the cache whether the copy that it has is
+  still good.</li>
+  <li>Under certain circumstances &#8212; for example, when it&#8217;s disconnected from a network &#8212;
+	a cache can serve stale responses without checking with the origin server.</li></ol>
+
+<p>If no validator (an <code>ETag</code> or <code>Last-Modified</code> header) is
+present on a response, <em>and</em> it doesn't have any explicit freshness information, 
+it will usually &#8212; but not always &#8212; be considered uncacheable.</p>
+</div>
+
+<p>Together, <em>freshness</em> and <em>validation</em> are the most important
+ways that a cache works with content. A fresh representation will be available
+instantly from the cache, while a validated representation will avoid sending
+the entire representation over again if it hasn&#8217;t changed.</p>
+
+<h2><a id="CONTROL" name="CONTROL">How (and how not) to Control
+Caches</a></h2>
+
+<p>There are several tools that Web designers and Webmasters can use to
+fine-tune how caches will treat their sites. It may require getting your hands
+a little dirty with your server&#8217;s configuration, but the results are worth it.
+For details on how to use these tools with your server, see the <a
+href="#IMP-SERVER">Implementation</a> sections below.</p>
+
+<h3><a id="META" name="META">HTML Meta Tags and HTTP Headers</a></h3>
+
+<p>HTML authors can put tags in a document&#8217;s &lt;HEAD&gt; section that
+describe its attributes. These <em>meta tags</em> are often used in the
+belief that they can mark a document as uncacheable, or expire it at a
+certain time.</p>
+
+<p>Meta tags are easy to use, but aren&#8217;t very effective. That&#8217;s because
+they&#8217;re only honored by a few browser caches (which actually read the HTML),
+not proxy caches (which almost never read the HTML in the document). While it
+may be tempting to put a Pragma: no-cache meta tag into a Web page, it won&#8217;t
+necessarily cause it to be kept fresh.</p>
+
+<p class="callout right">If your site is hosted at an ISP or hosting farm and they
+don&#8217;t give you the ability to set arbitrary HTTP headers (like <code>Expires</code> and
+<code>Cache-Control</code>), complain loudly; these are tools necessary for doing your
+job.</p>
+
+<p>On the other hand, true <em>HTTP headers</em> give you a lot of control
+over how both browser caches and proxies handle your representations. They
+can&#8217;t be seen in the HTML, and are usually automatically generated by the Web
+server. However, you can control them to some degree, depending on the server
+you use. In the following sections, you&#8217;ll see what HTTP headers are
+interesting, and how to apply them to your site.</p>
+
+<p>HTTP headers are sent by the server before the HTML, and only seen by the
+browser and any intermediate caches. Typical HTTP 1.1 response headers might
+look like this:</p>
+
+<pre class="example">HTTP/1.1 200 OK
+Date: Fri, 30 Oct 1998 13:19:41 GMT
+Server: Apache/1.3.3 (Unix)
+Cache-Control: max-age=3600, must-revalidate
+Expires: Fri, 30 Oct 1998 14:19:41 GMT
+Last-Modified: Mon, 29 Jun 1998 02:28:12 GMT
+ETag: "3e86-410-3596fbbc"
+Content-Length: 1040
+Content-Type: text/html</pre>
+
+<p>The HTML would follow these headers, separated by a blank
+line. See the <a href="#IMP-SERVER">Implementation</a> sections for information about how to set HTTP
+headers.</p>
+
+
+
+<h3><a id="PRAGMA" name="PRAGMA">Pragma HTTP Headers (and why they don&#8217;t
+work)</a></h3>
+
+<p>Many people believe that assigning a <code>Pragma: no-cache</code> HTTP header to a
+representation will make it uncacheable. This is not necessarily true; the
+HTTP specification does not set any guidelines for Pragma response headers;
+instead, Pragma request headers (the headers that a browser sends to a server)
+are discussed. Although a few caches may honor this header, the majority
+won&#8217;t, and it won&#8217;t have any effect. Use the headers below instead.</p>
+
+<h3><a id="EXPIRES" name="EXPIRES">Controlling Freshness with the Expires
+HTTP Header</a></h3>
+
+<p>The <code>Expires</code> HTTP header is a basic means of controlling caches; it tells
+all caches how long the associated representation is fresh for. After that
+time, caches will always check back with the origin server to see if a
+document is changed. <code>Expires</code> headers are supported by practically every
+cache.</p>
+
+<p>Most Web servers allow you to set <code>Expires</code> response headers in a number of
+ways. Commonly, they will allow setting an absolute time to expire, a time
+based on the last time that the client retrieved the representation (last <em>access
+time</em>), or a time based on the last time the document changed on your
+server (last <em>modification time</em>).</p>
+
+<p><code>Expires</code> headers are especially good for making static images (like
+navigation bars and buttons) cacheable. Because they don&#8217;t change much, you
+can set extremely long expiry time on them, making your site appear much more
+responsive to your users. They&#8217;re also useful for controlling caching of a
+page that is regularly changed. For instance, if you update a news page once a
+day at 6am, you can set the representation to expire at that time, so caches
+will know when to get a fresh copy, without users having to hit &#8216;reload&#8217;.</p>
+
+<p>The <strong>only</strong> value valid in an <code>Expires</code> header is a HTTP date;
+anything else will most likely be interpreted as &#8216;in the past&#8217;, so that the
+representation is uncacheable. Also, remember that the time in a HTTP date is
+Greenwich Mean Time (GMT), not local time.</p>
+
+<p>For example:</p>
+<pre><span class="example">Expires: Fri, 30 Oct 1998 14:19:41 GMT</span></pre>
+
+<p class="callout right">It&#8217;s important to make sure that your Web
+server&#8217;s clock is accurate if you use the <code>Expires</code> header. 
+One way to do this is using the <a class="offsite" href="http://www.ntp.org/">Network Time
+Protocol</a> (NTP); talk to your local system administrator to find out
+more.</p>
+
+<p>Although the <code>Expires</code> header is useful, it has some limitations. First,
+because there&#8217;s a date involved, the clocks on the Web server and the cache
+must be synchronised; if they have a different idea of the time, the intended
+results won&#8217;t be achieved, and caches might wrongly consider stale content as
+fresh.</p>
+
+
+<p>Another problem with <code>Expires</code> is that it&#8217;s easy to forget that you&#8217;ve set
+some content to expire at a particular time. If you don&#8217;t update an <code>Expires</code>
+time before it passes, each and every request will go back to your Web server, 
+increasing load and latency.</p>
+
+<h3><a id="CACHE-CONTROL" name="CACHE-CONTROL">Cache-Control HTTP
+Headers</a></h3>
+
+<p>HTTP 1.1 introduced a new class of headers, <code>Cache-Control</code> response
+headers, to give Web publishers more control over their content, and
+to address the limitations of <code>Expires</code>.</p>
+
+<p>Useful <code>Cache-Control</code> response headers include:</p>
+
+<ul>
+  <li><strong><code>max-age=</code></strong>[seconds] &#8212; specifies the maximum amount of
+  time that an representation will be considered fresh. Similar to <code>Expires</code>,
+  this directive is relative to the time of the request, rather than absolute.
+  [seconds] is the number of seconds from the time of the request you wish the
+  representation to be fresh for.</li>
+  <li><strong><code>s-maxage=</code></strong>[seconds] &#8212; similar to <code>max-age</code>, except that it
+  only applies to shared (e.g., proxy) caches.</li>
+  <li><strong><code>public</code></strong> &#8212; marks authenticated responses as cacheable;
+  normally, if HTTP authentication is required, responses are automatically
+  uncacheable (for shared caches).</li>
+  <li><strong><code>no-cache</code></strong> &#8212; forces caches to submit the request to the
+  origin server for validation before releasing a cached copy, every time.
+  This is useful to assure that authentication is respected (in combination
+  with public), or to maintain rigid freshness, without sacrificing all of the
+  benefits of caching.</li>
+  <li><strong><code>no-store</code></strong> &#8212; instructs caches not to keep a copy of the
+  representation under any conditions.</li>
+  <li><strong><code>must-revalidate</code></strong> &#8212; tells caches that they must obey any
+  freshness information you give them about a representation. HTTP allows
+  caches to serve stale representations under special conditions; by
+  specifying this header, you&#8217;re telling the cache that you want it to
+  strictly follow your rules.</li>
+  <li><strong><code>proxy-revalidate</code></strong> &#8212; similar to <code>must-revalidate</code>, except
+  that it only applies to proxy caches.</li>
+</ul>
+
+<p>For example:</p>
+<pre><span class="example">Cache-Control: max-age=3600, must-revalidate</span></pre>
+
+<p>If you plan to use the <code>Cache-Control</code> headers, you should have a look at
+the excellent documentation in HTTP 1.1; see <a
+href="#REF">References and Further Information</a>.</p>
+
+<h3><a id="VALIDATE" name="VALIDATE">Validators and Validation</a></h3>
+
+<p class="ad right">
+<script type="text/javascript"><!--
+google_ad_client = "pub-6006191079307782";
+google_ad_width = 250;
+google_ad_height = 250;
+google_ad_format = "250x250_as";
+google_ad_type = "text_image";
+//2007-01-25: cache_tutorial_side
+google_ad_channel = "6984516876";
+google_color_border = "E9E9E9";
+google_color_bg = "FEFEFE";
+google_color_link = "3366AA";
+google_color_text = "333333";
+google_color_url = "003399";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</p>
+
+<p>In <a href="#WORK">How Web Caches Work</a>, we said that validation is used
+by servers and caches to communicate when an representation has changed. By
+using it, caches avoid having to download the entire representation when they
+already have a copy locally, but they&#8217;re not sure if it&#8217;s still fresh.</p>
+
+<p>Validators are very important; if one isn&#8217;t present, and there isn&#8217;t any
+freshness information (<code>Expires</code> or <code>Cache-Control</code>) available, caches will
+not store a representation at all.</p>
+
+<p>The most common validator is the time that the document last changed, as
+communicated in <code>Last-Modified</code> header. When a cache has an
+representation stored that includes a <code>Last-Modified</code> header, it can use it to
+ask the server if the representation has changed since the last time it was
+seen, with an <code>If-Modified-Since</code> request.</p>
+
+<p>HTTP 1.1 introduced a new kind of validator called the <em>ETag</em>. ETags
+are unique identifiers that are generated by the server and changed every time
+the representation does. Because the server controls how the ETag is
+generated, caches can be surer that if the ETag matches when they make a
+<code>If-None-Match</code> request, the representation really is the same.</p>
+
+<p>Almost all caches use Last-Modified times in determining if an
+representation is fresh; ETag validation is also becoming prevalent.</p>
+
+<p>Most modern Web servers will generate both <code>ETag</code> and <code>Last-Modified</code>
+headers to use as validators for static content (i.e., files) automatically; you won&#8217;t have to
+do anything. However, they don&#8217;t know enough about dynamic content (like CGI,
+ASP or database sites) to generate them; see <a href="#SCRIPT">Writing
+Cache-Aware Scripts</a>.</p>
+
+<h2><a id="TIPS" name="TIPS">Tips for Building a Cache-Aware Site</a></h2>
+
+<p>Besides using freshness information and validation, there are a number of
+other things you can do to make your site more cache-friendly.</p>
+<ul>
+  <li><strong>Use URLs consistently</strong> &#8212; this is the golden
+    rule of caching. If you serve the same content on different pages, to
+    different users, or from different sites, it should use the same URL.
+    This is the easiest and most effective may to make your site
+    cache-friendly. For example, if you use &#8220;/index.html&#8221; in your HTML as a
+    reference once, always use it that way.</li>
+  <li><strong>Use a common library of images</strong> and other elements and
+    refer back to them from different places.</li>
+  <li><strong>Make caches store images and pages that don&#8217;t change
+  often</strong> by using a <code>Cache-Control: max-age</code> header with a large
+  value.</li>
+  <li><strong>Make caches recognise regularly updated pages</strong> by
+    specifying an appropriate max-age or expiration time.</li>
+  <li><strong>If a resource (especially a downloadable file) changes, change
+    its name.</strong> That way, you can make it expire far in the future,
+    and still guarantee that the correct version is served; the page that
+    links to it is the only one that will need a short expiry time.</li>
+  <li><strong>Don&#8217;t change files unnecessarily.</strong> If you do,
+    everything will have a falsely young <code>Last-Modified</code> date. For instance,
+    when updating your site, don&#8217;t copy over the entire site; just move the
+    files that you&#8217;ve changed.</li>
+  <li><strong>Use cookies only where necessary</strong> &#8212; cookies are
+    difficult to cache, and aren&#8217;t needed in most situations. If you must use
+    a cookie, limit its use to dynamic pages.</li>
+  <li><strong>Minimize use of SSL</strong> &#8212; because encrypted pages are not
+    stored by shared caches, use them only when you have to, and use images
+    on SSL pages sparingly.</li>
+  <li><strong>Check your pages with <a href="http://redbot.org/">REDbot</a></strong>
+    &#8212; it can help you apply many of the concepts in this tutorial.</li>
+</ul>
+
+<h2><a id="SCRIPT" name="SCRIPT">Writing Cache-Aware Scripts</a></h2>
+
+<p>By default, most scripts won&#8217;t return a validator (a <code>Last-Modified</code>
+or <code>ETag</code> response header) or freshness information (<code>Expires</code> or <code>Cache-Control</code>).
+While some scripts really are dynamic (meaning that they return a different
+response for every request), many (like search engines and database-driven
+sites) can benefit from being cache-friendly.</p>
+
+<p>Generally speaking, if a script produces output that is reproducible with
+the same request at a later time (whether it be minutes or days later), it
+should be cacheable. If the content of the script changes only depending on
+what&#8217;s in the URL, it is cacheble; if the output depends on a cookie,
+authentication information or other external criteria, it probably isn&#8217;t.</p>
+<ul>
+  <li>The best way to make a script cache-friendly (as well as perform
+    better) is to dump its content to a plain file whenever it changes. The
+    Web server can then treat it like any other Web page, generating and
+    using validators, which makes your life easier. Remember to only write
+    files that have changed, so the <code>Last-Modified</code> times are preserved.</li>
+  <li>Another way to make a script cacheable in a limited fashion is to set
+    an age-related header for as far in the future as practical. Although
+    this can be done with <code>Expires</code>, it&#8217;s probably easiest to do so with
+    <code>Cache-Control: max-age</code>, which will make the request fresh for an amount
+    of time after the request.</li>
+  <li>If you can&#8217;t do that, you&#8217;ll need to make the script generate a
+    validator, and then respond to <code>If-Modified-Since</code> and/or <code>If-None-Match</code>
+    requests. This can be done by parsing the HTTP headers, and then
+    responding with <code>304 Not Modified</code> when appropriate. Unfortunately, this is
+    not a trival task.</li>
+</ul>
+
+<p>Some other tips;</p>
+<ul>
+  <li><strong>Don&#8217;t use POST</strong> unless it&#8217;s appropriate. Responses to
+  the POST method aren&#8217;t kept by most caches; if you send information in the
+  path or query (via GET), caches can store that information for the
+  future.</li>
+  <li><strong>Don&#8217;t embed user-specific information in the URL</strong> unless
+  the content generated is completely unique to that user.</li>
+  <li><strong>Don&#8217;t count on all requests from a user coming from the same
+  host</strong>, because caches often work together.</li>
+  <li><strong>Generate <code>Content-Length</code> response headers.</strong> It&#8217;s easy to
+  do, and it will allow the response of your script to be used in a
+  <em>persistent connection</em>. This allows clients to request
+  multiple representations on one TCP/IP connection, instead of setting up a
+  connection for every request. It makes your site seem much faster.</li>
+</ul>
+
+<p>See the <a href="#IMP-SCRIPT">Implementation Notes</a> for more specific
+information.</p>
+
+<h2><a id="FAQ" name="FAQ">Frequently Asked Questions</a></h2>
+
+<h3>What are the most important things to make cacheable?</h3>
+
+<p>A good strategy is to identify the most popular, largest representations
+(especially images) and work with them first.</p>
+
+<h3>How can I make my pages as fast as possible with caches?</h3>
+
+<p>The most cacheable representation is one with a long freshness time set.
+Validation does help reduce the time that it takes to see a representation,
+but the cache still has to contact the origin server to see if it&#8217;s fresh. If
+the cache already knows it&#8217;s fresh, it will be served directly.</p>
+
+<h3>I understand that caching is good, but I need to keep statistics on how
+many people visit my page!</h3>
+
+<p>If you must know every time a page is accessed, select ONE small item on
+a page (or the page itself), and make it uncacheable, by giving it a suitable
+headers. For example, you could refer to a 1x1 transparent uncacheable image
+from each page. The <code>Referer</code> header will contain information about what page
+called it.</p>
+
+<p>Be aware that even this will not give truly accurate statistics about your
+users, and is unfriendly to the Internet and your users; it generates
+unnecessary traffic, and forces people to wait for that uncached item to be
+downloaded. For more information about this, see On Interpreting Access
+Statistics in the <a href="#REF">references</a>.</p>
+
+<h3>How can I see a representation&#8217;s HTTP headers?</h3>
+
+<p>Many Web browsers let you see the <code>Expires</code> and <code>Last-Modified</code> headers are in
+a &#8220;page info&#8221; or similar interface. If available, this will give you a menu of
+the page and any representations (like images) associated with it, along with
+their details.</p>
+
+<p>To see the full headers of a representation, you can manually connect to
+the Web server using a Telnet client.</p>
+
+<p>To do so, you may need to type the port (be default, 80) into a separate
+field, or you may need to connect to <code>www.example.com:80</code> or <code>www.example.com 80</code>
+(note the space). Consult your Telnet client&#8217;s documentation.</p>
+
+<p>Once you&#8217;ve opened a connection to the site, type a request for the
+representation. For instance, if you want to see the headers for
+<code>http://www.example.com/foo.html</code>, connect to <code>www.example.com</code>, port <code>80</code>, and
+type:</p>
+<pre class="example">GET /foo.html HTTP/1.1 [return]
+Host: www.example.com [return][return]</pre>
+
+<p>Press the Return key every time you see <code>[return]</code>; make sure to press it
+twice at the end. This will print the headers, and then the full
+representation. To see the headers only, substitute HEAD for GET.</p>
+
+
+<h3>My pages are password-protected; how do proxy caches deal with them?</h3>
+
+<p>By default, pages protected with HTTP authentication are considered private;
+they will not be kept by shared caches. However, you can make authenticated
+pages public with a Cache-Control: public header; HTTP 1.1-compliant caches will then
+allow them to be cached.</p>
+
+<p>If you&#8217;d like such pages to be cacheable, but still authenticated for every
+user, combine the <code>Cache-Control: public</code> and <code>no-cache</code> headers. This tells the
+cache that it must submit the new client&#8217;s authentication information to the
+origin server before releasing the representation from the cache. This would look like:</p>
+
+<pre><span class="example">Cache-Control: public, no-cache</span></pre>
+
+<p>Whether or not this is done, it&#8217;s best to minimize use of authentication;
+for example, if your images are not sensitive, put them in a separate
+directory and configure your server not to force authentication for it. That
+way, those images will be naturally cacheable.</p>
+
+
+<h3>Should I worry about security if people access my site through a
+cache?</h3>
+
+<p>SSL pages are not cached (or decrypted) by proxy caches, so you don&#8217;t have
+to worry about that. However, because caches store non-SSL requests and URLs
+fetched through them, you should be conscious about unsecured sites; an
+unscrupulous administrator could conceivably gather information about their
+users, especially in the URL.</p>
+
+<p>In fact, any administrator on the network between your server and your
+clients could gather this type of information. One particular problem is when
+CGI scripts put usernames and passwords in the URL itself; this makes it
+trivial for others to find and user their login.</p>
+
+<p>If you&#8217;re aware of the issues surrounding Web security in general, you
+shouldn&#8217;t have any surprises from proxy caches.</p>
+
+<h3>I&#8217;m looking for an integrated Web publishing solution. Which ones are
+cache-aware?</h3>
+
+<p>It varies. Generally speaking, the more complex a solution is, the more
+difficult it is to cache. The worst are ones which dynamically generate all
+content and don&#8217;t provide validators; they may not be cacheable at all. Speak
+with your vendor&#8217;s technical staff for more information, and see the
+Implementation notes below.</p>
+
+<h3>My images expire a month from now, but I need to change them in the
+caches now!</h3>
+
+<p>The Expires header can&#8217;t be circumvented; unless the cache (either browser
+or proxy) runs out of room and has to delete the representations, the cached
+copy will be used until then.</p>
+
+<p>The most effective solution is to change any links to them; that way,
+completely new representations will be loaded fresh from the origin server.
+Remember that the page that refers to an representation will be cached as
+well. Because of this, it&#8217;s best to make static images and similar
+representations very cacheable, while keeping the HTML pages that refer to
+them on a tight leash.</p>
+
+<p>If you want to reload an representation from a specific cache, you can
+either force a reload (in Firefox, holding down shift while pressing &#8216;reload&#8217;
+will do this by issuing a <code>Pragma: no-cache</code> request header) while using the
+cache. Or, you can have the cache administrator delete the representation
+through their interface.</p>
+
+<h3>I run a Web Hosting service. How can I let my users publish
+cache-friendly pages?</h3>
+
+<p>If you&#8217;re using Apache, consider allowing them to use .htaccess files and
+providing appropriate documentation.</p>
+
+<p>Otherwise, you can establish predetermined areas for various caching
+attributes in each virtual server. For instance, you could specify a
+directory /cache-1m that will be cached for one month after access, and a
+/no-cache area that will be served with headers instructing caches not to
+store representations from it.</p>
+
+<p>Whatever you are able to do, it is best to work with your largest
+customers first on caching. Most of the savings (in bandwidth and in load on
+your servers) will be realized from high-volume sites.</p>
+
+<h3>I&#8217;ve marked my pages as cacheable, but my browser keeps requesting them
+on every request. How do I force the cache to keep representations of them?</h3>
+
+<p>Caches aren&#8217;t required to keep a representation and reuse it; they&#8217;re only
+required to <strong>not</strong> keep or use them under some conditions. All
+caches make decisions about which representations to keep based upon their
+size, type (e.g., image vs. html), or by how much space they have left to keep
+local copies. Yours may not be considered worth keeping around, compared to 
+more popular or larger representations.</p>
+
+<p>Some caches do allow their administrators to prioritize what kinds of 
+representations are kept, and some allow representations to be &#8220;pinned&#8221; in
+cache, so that they&#8217;re always available.</p>
+
+
+<h2><a id="IMP-SERVER" name="IMP-SERVER">Implementation Notes &#8212; Web
+Servers</a></h2>
+
+<p>Generally speaking, it&#8217;s best to use the latest version of whatever Web
+server you&#8217;ve chosen to deploy. Not only will they likely contain more
+cache-friendly features, new versions also usually have important security
+and performance improvements.</p>
+
+<h3>Apache HTTP Server</h3>
+
+<p><a class="offsite" href="http://www.apache.org/">Apache</a> uses
+optional modules to include headers, including both Expires and
+Cache-Control. Both modules are available in the 1.2 or greater
+distribution.</p>
+
+<p>The modules need to be built into Apache; although they are included in
+the distribution, they are not turned on by default. To find out if the
+modules are enabled in your server, find the httpd binary and run <tt>httpd
+-l</tt>; this should print a list of the available modules (note that this only 
+lists compiled-in modules; on later versions of Apache, use <tt>httpd -M</tt> 
+to include dynamically loaded modules as well). The modules we&#8217;re
+looking for are mod_expires and mod_headers.</p>
+<ul>
+  <li>If they aren&#8217;t available, and you have administrative access, you can
+    recompile Apache to include them. This can be done either by uncommenting
+    the appropriate lines in the Configuration file, or using the
+    <tt>-enable-module=expires</tt> and <tt>-enable-module=headers</tt>
+    arguments to configure (1.3 or greater). Consult the INSTALL file found
+    with the Apache distribution.</li>
+</ul>
+
+<p>Once you have an Apache with the appropriate modules, you can use
+mod_expires to specify when representations should expire, either in .htaccess
+files or in the server&#8217;s access.conf file. You can specify expiry from either
+access or modification time, and apply it to a file type or as a default. See
+the <a class="offsite"
+href="http://www.apache.org/docs/mod/mod_expires.html">module
+documentation</a> for more information, and speak with your local Apache guru
+if you have trouble.</p>
+
+<p>To apply <code>Cache-Control</code> headers, you&#8217;ll need to use the mod_headers module,
+which allows you to specify arbitrary HTTP headers for a resource. See <a
+class="offsite" href="http://www.apache.org/docs/mod/mod_headers.html">the 
+mod_headers documentation</a>.</p>
+
+<p>Here&#8217;s an example .htaccess file that demonstrates the use of some
+headers.</p>
+<ul>
+  <li>.htaccess files allow web publishers to use commands normally only
+    found in configuration files. They affect the content of the directory
+    they&#8217;re in and their subdirectories. Talk to your server administrator to
+    find out if they&#8217;re enabled.</li>
+</ul>
+<pre class="example">### activate mod_expires
+ExpiresActive On
+### Expire .gif's 1 month from when they're accessed
+ExpiresByType image/gif A2592000
+### Expire everything else 1 day from when it's last modified
+### (this uses the Alternative syntax)
+ExpiresDefault "modification plus 1 day"
+### Apply a Cache-Control header to index.html
+&lt;Files index.html&gt;
+Header append Cache-Control "public, must-revalidate"
+&lt;/Files&gt;</pre>
+<ul>
+  <li>Note that mod_expires automatically calculates and inserts a
+    <code>Cache-Control:max-age</code> header as appropriate.</li>
+</ul>
+
+<p>Apache 2&#8217;s configuration is very similar to that of 1.3; see the 2.2 <a
+class="offsite"
+href="http://httpd.apache.org/docs/2.2/mod/mod_expires.html">mod_expires</a> and
+<a class="offsite"
+href="http://httpd.apache.org/docs/2.2/mod/mod_headers.html">mod_headers</a>
+documentation for more information.</p>
+
+
+<h3>Microsoft IIS</h3>
+
+<p><a class="offsite" href="http://www.microsoft.com/">Microsoft</a>&#8217;s
+Internet Information Server makes it very easy to set headers in a somewhat
+flexible way. Note that this is only possible in version 4 of the server,
+which will run only on NT Server.</p>
+
+<p>To specify headers for an area of a site, select it in the
+<tt>Administration Tools</tt> interface, and bring up its properties. After
+selecting the <tt>HTTP Headers</tt> tab, you should see two interesting
+areas; <tt>Enable Content Expiration</tt> and <tt>Custom HTTP headers</tt>.
+The first should be self-explanatory, and the second can be used to apply
+Cache-Control headers.</p>
+
+<p>See the ASP section below for information about setting headers in Active
+Server Pages. It is also possible to set headers from ISAPI modules; refer to
+MSDN for details.</p>
+
+
+<h3>Netscape/iPlanet Enterprise Server</h3>
+
+<p>As of version 3.6, Enterprise Server does not provide any obvious way to
+set Expires headers. However, it has supported HTTP 1.1 features since version
+3.0. This means that HTTP 1.1 caches (proxy and browser) will be able to take
+advantage of Cache-Control settings you make.</p>
+
+<p>To use Cache-Control headers, choose <tt>Content Management | Cache Control
+Directives</tt> in the administration server. Then, using the Resource Picker,
+choose the directory where you want to set the headers. After setting the
+headers, click &#8216;OK&#8217;. For more information, see the <a class="offsite"
+href="http://developer.netscape.com/docs/manuals/enterprise/admnunix/content.htm#1006282">NES manual</a>.</p>
+
+
+<h2><a id="IMP-SCRIPT" name="IMP-SCRIPT">Implementation Notes &#8212; Server-Side
+Scripting</a></h2>
+
+<p class="callout right">One thing to keep in mind is that it may be easier to set
+HTTP headers with your Web server rather than in the scripting language. Try
+both. </p>
+
+<p>Because the emphasis in server-side scripting is on dynamic content, it
+doesn&#8217;t make for very cacheable pages, even when the content could be cached.
+If your content changes often, but not on every page hit, consider setting a
+Cache-Control: max-age header; most users access pages again in a relatively
+short period of time. For instance, when users hit the &#8216;back&#8217; button, if there
+isn&#8217;t any validator or freshness information available, they&#8217;ll have to wait
+until the page is re-downloaded from the server to see it.</p>
+
+
+<h3>CGI</h3>
+
+<p>CGI scripts are one of the most popular ways to generate content. You can
+easily append HTTP response headers by adding them before you send the body;
+Most CGI implementations already require you to do this for the
+<tt>Content-Type</tt> header. For instance, in Perl;</p>
+
+<pre class="example">#!/usr/bin/perl
+print "Content-type: text/html\n";
+print "Expires: Thu, 29 Oct 1998 17:04:19 GMT\n";
+print "\n";
+### the content body follows...</pre>
+
+<p>Since it&#8217;s all text, you can easily generate <code>Expires</code> and other
+date-related headers with in-built functions. It&#8217;s even easier if you use
+<code>Cache-Control: max-age</code>;</p>
+
+<pre><span class="example">print "Cache-Control: max-age=600\n";</span></pre>
+
+<p>This will make the script cacheable for 10 minutes after the request, so
+that if the user hits the &#8216;back&#8217; button, they won&#8217;t be resubmitting the
+request.</p>
+
+<p>The CGI specification also makes request headers that the client sends
+available in the environment of the script; each header has &#8216;HTTP_&#8217; appended
+to its name. So, if a client makes an <code>If-Modified-Since</code> request, it may show
+up like this:</p>
+
+<pre><span class="example">HTTP_IF_MODIFIED_SINCE = Fri, 30 Oct 1998 14:19:41 GMT </span></pre>
+
+<p>See also the <a href="http://www.mnot.net/cgi_buffer/">cgi_buffer</a>
+library, which automatically handles ETag generation and validation,
+<code>Content-Length</code> generation and gzip content-oding for Perl and Python CGI
+scripts with a one-line include. The Python version can also be used to wrap
+arbitrary CGI scripts with.</p>
+
+<h3>Server Side Includes</h3>
+
+<p>SSI (often used with the extension .shtml) is one of the first ways that
+Web publishers were able to get dynamic content into pages. By using special
+tags in the pages, a limited form of in-HTML scripting was available.</p>
+
+<p>Most implementations of SSI do not set validators, and as such are not
+cacheable. However, Apache&#8217;s implementation does allow users to specify which
+SSI files can be cached, by setting the group execute permissions on the
+appropriate files, combined with the <code>XbitHack full</code> directive. For more
+information, see the <a class="offsite"
+href="http://www.apache.org/docs/mod/mod_include.html">mod_include
+documentation</a>.</p>
+
+<h3>PHP</h3>
+
+<p><a class="offsite" href="http://www.php.net/">PHP</a> is a
+server-side scripting language that, when built into the server, can be used
+to embed scripts inside a page&#8217;s HTML, much like SSI, but with a far larger
+number of options. PHP can be used as a CGI script on any Web server (Unix or
+Windows), or as an Apache module.</p>
+
+<p>By default, representations processed by PHP are not assigned validators,
+and are therefore uncacheable. However, developers can set HTTP headers by
+using the <code>Header()</code> function.</p>
+
+<p>For example, this will create a Cache-Control header, as well as an
+Expires header three days in the future:</p>
+<pre class="example">&lt;?php
+ Header("Cache-Control: must-revalidate");
+
+ $offset = 60 * 60 * 24 * 3;
+ $ExpStr = "Expires: " . gmdate("D, d M Y H:i:s", time() + $offset) . " GMT";
+ Header($ExpStr);
+?&gt;</pre>
+
+<p>Remember that the <code>Header()</code> function MUST come before any other output.</p>
+
+<p>As you can see, you&#8217;ll have to create the HTTP date for an <code>Expires</code> header
+by hand; PHP doesn&#8217;t provide a function to do it for you (although recent
+versions have made it easier; see the <a href="http://php.net/date" class="offsite"
+>PHP's date documentation</a>). Of course, it&#8217;s
+easy to set a <code>Cache-Control: max-age header</code>, which is just as good for most
+situations.</p>
+
+<p>For more information, see the <a class="offsite"
+href="http://www.php.net/manual/function.header.php3">manual entry for
+header</a>.</p>
+
+<p>See also the <a class="offsite"
+href="http://www.mnot.net/cgi_buffer/">cgi_buffer</a> library, which
+automatically handles <code>ETag</code> generation and validation, <code>Content-Length</code>
+generation and gzip content-coding for PHP scripts with a one-line
+include.</p>
+
+<h3>Cold Fusion</h3>
+
+<p><a href="http://www.macromedia.com/software/coldfusion/"
+class="offsite">Cold Fusion</a>, by <a class="offsite"
+href="http://www.macromedia.com/">Macromedia</a> is a commercial server-side
+scripting engine, with support for several Web servers on Windows, Linux and
+several flavors of Unix.</p>
+
+<p>Cold Fusion makes setting arbitrary HTTP headers relatively easy, with the
+<tt><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000270.htm" class="offsite">CFHEADER</a></tt> 
+tag. Unfortunately, their example for setting an <code>Expires</code> header, as below, is a bit misleading.</p>
+
+<pre><span class="example">&lt;CFHEADER NAME="Expires" VALUE="#Now()#"&gt;</span></pre>
+
+<p>It doesn&#8217;t work like you might think, because the time (in this case, when the request is made)
+doesn&#8217;t get converted to a HTTP-valid date; instead, it just gets printed as
+a representation of Cold Fusion&#8217;s Date/Time object. Most clients will either
+ignore such a value, or convert it to a default, like January 1, 1970.</p>
+
+<p>However, Cold Fusion does provide a date formatting function that will do the job; 
+<tt><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000483.htm" 
+class="offsite">GetHttpTimeSTring</a></tt>. In combination with <tt>
+<a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000437.htm" class="offsite">DateAdd</a></tt>, it’s easy to set Expires dates; 
+here, we set a header to declare that representations of the page expire in one month;</p>
+
+<pre><span class="example">&lt;cfheader name="Expires" value="#GetHttpTimeString(DateAdd('m', 1, Now()))#"&gt;</span></pre>
+
+<p>You can also use the <code>CFHEADER</code> tag to set <code>Cache-Control: max-age</code> and other headers.</p>
+
+<p>Remember that Web server headers are passed through in some deployments of Cold Fusion
+(such as CGI); check yours to determine whether you can use
+this to your advantage, by setting headers on the server instead of in Cold
+Fusion.</p>
+
+<h3>ASP and ASP.NET</h3>
+
+<p class="callout right">When setting HTTP headers from ASPs, make sure you either
+place the Response method calls before any HTML generation, or use
+<code>Response.Buffer</code> to buffer the output. Also, note that some versions of IIS set
+a <code>Cache-Control: private</code> header on ASPs by default, and must be declared public
+to be cacheable by shared caches.</p>
+
+<p>Active Server Pages, built into IIS and also available for other Web
+servers, also allows you to set HTTP headers. For instance, to set an expiry
+time, you can use the properties of the <code>Response</code> object;</p>
+
+<pre><span class="example">&lt;% Response.Expires=1440 %&gt;</span></pre>
+
+<p>specifying the number of minutes from the request to expire the
+representation. Likewise, absolute expiry time can be set like this (make sure
+you format HTTP date correctly):</p>
+
+<pre><span class="example">&lt;% Response.ExpiresAbsolute=#May 31,1996 13:30:15 GMT# %&gt;</span></pre>
+
+<p><code>Cache-Control</code> headers can be added like this:</p>
+
+<pre><span class="example">&lt;% Response.CacheControl="public" %&gt;</span></pre>
+
+
+<p>In ASP.NET, <code>Response.Expires</code> is deprecated; the proper way to set cache-related
+headers is with <code>Response.Cache</code>;</p>
+
+<pre class="example">Response.Cache.SetExpires ( DateTime.Now.AddMinutes ( 60 ) ) ;
+Response.Cache.SetCacheability ( HttpCacheability.Public ) ;</pre>
+
+<p>See the <a class="offsite"
+href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpconaspoutputcache.asp">MSDN documentation</a> for more
+information.</p>
+
+
+<h2><a id="REF" name="REF">References and Further Information</a></h2>
+
+<h3><a href="http://www.ietf.org/rfc/rfc2616.txt" class="offsite">HTTP 1.1 Specification</a></h3>
+
+<p>The HTTP 1.1 spec has many extensions for making pages cacheable,
+and is the authoritative guide to implementing the protocol. See sections 13,
+14.9, 14.21, and 14.25.</p>
+
+<h3><a class="offsite" href="http://www.web-caching.com/">Web-Caching.com</a></h3>
+
+<p>An excellent introduction to caching concepts, with links to other online
+resources.</p>
+
+<h3><a class="offsite" href="http://www.goldmark.org/netrants/webstats/">On Interpreting
+Access Statistics</a></h3>
+
+<p>Jeff Goldberg&#8217;s informative rant on why you shouldn&#8217;t rely on access
+statistics and hit counters.</p>
+
+<h3><a href="http://redbot.org/">REDbot</a></h3>
+
+<p>Examines HTTP resources to determine how they will interact with Web caches, and generally how well they use the protocol.</p>
+
+<h3><a
+href="http://www.mnot.net/cgi_buffer/">cgi_buffer Library</a></h3>
+
+<p>One-line include in Perl CGI, Python CGI and PHP scripts automatically
+handles ETag generation and validation, Content-Length generation and gzip
+Content-Encoding &#8212; correctly. The Python version can also be used as a
+wrapper around arbitrary CGI scripts.</p>
+
+
+
+<h2><a id="ABOUT" name="ABOUT">About This Document</a></h2>
+
+<p>This document is Copyright &copy; 1998-2009 Mark Nottingham &lt;<a
+href="mailto:mnot@pobox.com">mnot@pobox.com</a>&gt;.
+
+<!-- Creative Commons License -->
+This work is licensed under a <a class="offsite" href="http://creativecommons.org/licenses/by-nd-nc/2.0/">Creative Commons License</a>.
+<!-- /Creative Commons License -->
+</p>
+
+<!--
+
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="">
+   <dc:type rdf:resource="http://purl.org/dc/dcmitype/Text" />
+   <license rdf:resource="http://creativecommons.org/licenses/by-nd-nc/2.0/" />
+</Work>
+
+<License rdf:about="http://creativecommons.org/licenses/by-nd-nc/2.0/">
+   <permits rdf:resource="http://web.resource.org/cc/Reproduction" />
+   <permits rdf:resource="http://web.resource.org/cc/Distribution" />
+   <requires rdf:resource="http://web.resource.org/cc/Notice" />
+   <requires rdf:resource="http://web.resource.org/cc/Attribution" />
+   <prohibits rdf:resource="http://web.resource.org/cc/CommercialUse" />
+</License>
+
+</rdf:RDF>
+
+-->
+
+<p>If you do mirror this document, please send e-mail to the address above,
+so that you can be informed of updates.</p>
+
+<p>All trademarks within are property of their respective holders.</p>
+
+<p>Although the author believes the contents to be accurate at the time of
+publication, no liability is assumed for them, their application or any
+consequences thereof. If any misrepresentations, errors or other need for
+clarification is found, please contact the author immediately.</p>
+
+<p>The latest revision of this document can always be obtained from <a
+href="http://www.mnot.net/cache_docs/">http://www.mnot.net/cache_docs/</a></p>
+
+<p>Translations are available in: <a href="http://www.jakpsatweb.cz/clanky/caching-tutorial-czech-translation.html"
+hreflang="cz" title="Kešovací návod pro autory webu a webmastery">Czech</a>, <a href="index.fr.html" hreflang="fr" title="Un tutoriel de la mise en cache">French</a>, and <a href="http://www.chedong.com/tech/cache_docs.html" hreflang="zh" title="面向站长和网站管理员的Web缓存加速指南">Chinese</a>.</p>
+
+<p class="version">Version 1.85 &#8212; December 7, 2009</p>
+
+<p class="button"><a href="http://creativecommons.org/licenses/by-nc-nd/2.0/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights.gif"></a></p>
+
+<hx:include src="/templates/footer.html"></hx:include>
+
+</body>
+</html>
