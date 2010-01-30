@@ -1,0 +1,890 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:hx="http://purl.org/NET/html_extensions">
+<head>
+  <title>Un tutoriel de la mise en cache pour les auteurs Web et les webmestres</title>
+
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  <link rel="contents" href="#TOC">
+  <link rel="copyright" href="#ABOUT">
+  <link rel="disclaimer" href="#ABOUT">
+  <link rel="author" href="mailto:mnot@pobox.com">
+  <link rev="made" href="mailto:mnot@pobox.com">
+  <link rel="bookmark" href="http://www.mnot.net/cache_docs/"
+  title="Un tutoriel de la mise en cache pour les auteurs Web et les webmestres">
+  <link rel="section" href="#DEFINITION"
+  title="Qu'est-ce qu'un cache Web ? À quoi servent-ils ?">
+  <link rel="section" href="#KINDS" title="Les types de cache Web">
+  <link rel="section" href="#WHY"
+  title="Les caches Web ne sont-ils pas mauvais pour moi ? Pourquoi devrais-je les aider ?">
+  <link rel="section" href="#WORK" title="Comment fonctionnent les caches Web">
+  <link rel="section" href="#CONTROL"
+  title="Comment contrôler les caches (et ne pas les contrôler)">
+  <link rel="section" href="#TIPS"
+  title="Astuces pour construire un site compatible avec les caches">
+  <link rel="section" href="#SCRIPT" title="Écrire des scripts compatibles avec les caches">
+  <link rel="section" href="#FAQ" title="Foire aux questions">
+  <link rel="appendix" href="#IMP-SERVER"
+  title="Notes de mise en œuvre - Les serveurs Web">
+  <link rel="appendix" href="#IMP-SCRIPT"
+  title="Notes de mise en œuvre - Les scripts côté-serveur">
+  <link rel="appendix" href="#REF" title="Références et autres informations">
+  <!--base href="http://www.mnot.net/cache_docs/" /-->
+  <meta name="description"
+  content="Couvre le pourquoi et le comment de la mise en cache Web pour les personnes qui publient sur le Web. FAQ incluse.">
+  <meta name="keywords"
+  content="FAQ, tutorial, cache Web, proxy, cache, Expires, Cache-Control, HTTP, en-têtes, Last-Modified, ETag, HTTP/1.1, webmestre, Squid, Serveur mandataire, NetCache, CacheEngine">
+  <script type="text/javascript" src="/templates/hinclude.js" defer="defer"></script>
+</head>
+
+<body>
+<h1>Un tutoriel de la <span title="caching">mise en cache</span></h1>
+<p class="subtitle">pour les auteurs Web et les webmestres</p>
+
+<p class="banner">Ce document est informatif. Bien que de nature technique, il essaye de rendre les concepts mis en jeu
+compréhensibles et applicables à des situations concrètes. Pour cette raison, certains aspects de la documentation sont simplifiés
+ou omis, par souci de clarté. Si votre intérêt sur le sujet vous porte aux détails, veuillez explorer le chapitre
+« <a href="#REF">Références et autres informations</a> » à la fin.</p>
+
+<a id="TOC" name="TOC"></a> 
+<ol class="TOC">
+  <li class="TOC"><a href="#DEFINITION">Qu'est-ce qu'un cache Web ? À quoi servent-ils ?</a></li>
+  <li class="TOC"><a href="#KINDS">Les types de cache Web</a> 
+    <ol class="SUBTOC">
+      <li class="SUBTOC"><a href="#BROWSER">Les <span title="N.d.T. browser caches">caches de navigateurs</span></a></li>
+      <li class="SUBTOC"><a href="#PROXY">Les <span title="N.d.T. proxy caches">caches de serveurs mandataires</span></a></li>
+    </ol>
+  </li>
+  <li class="TOC"><a href="#WHY">Les caches Web ne sont-ils pas mauvais pour moi ? Pourquoi devrais-je les aider ?</a></li>
+  <li class="TOC"><a href="#WORK">Comment fonctionnent les caches Web</a></li>
+  <li class="TOC"><a href="#CONTROL">Comment contrôler les caches (et ne pas les contrôler)</a> 
+    <ol class="SUBTOC">
+      <li class="SUBTOC"><a href="#META">Les balises Meta HTML contre les <span title="N.d.T. headers">en-têtes</span> HTTP</a></li>
+      <li class="SUBTOC"><a href="#PRAGMA">Les en-têtes HTTP <code>Pragma</code> (et pourquoi elles ne fonctionnent pas)</a></li>
+      <li class="SUBTOC"><a href="#EXPIRES">Le contrôle de la fraîcheur avec l'en-tête HTTP <code>Expires</code></a></li>
+      <li class="SUBTOC"><a href="#CACHE-CONTROL">Les en-têtes HTTP <code>Expires</code></a></li>
+      <li class="SUBTOC"><a href="#VALIDATE">Les validateurs et la validation</a></li>
+    </ol>
+  </li>
+  <li class="TOC"><a href="#TIPS">Astuces pour construire un site compatible avec les caches</a></li>
+  <li class="TOC"><a href="#SCRIPT">Écrire des scripts compatibles avec les caches</a></li>
+  <li class="TOC"><a href="#FAQ">Foire aux questions</a></li>
+  <li class="TOC"><a href="#IMP-SERVER">Notes de mise en œuvre &#8212; Les serveurs Web</a></li>
+  <li class="TOC"><a href="#IMP-SCRIPT">Notes de mise en œuvre &#8212; Les scripts côté-serveur</a></li>
+  <li class="TOC"><a href="#REF">Références et autres informations</a></li>
+  <li class="TOC"><a href="#ABOUT">À propos de ce document</a></li>
+</ol>
+
+<p align="center" class="ad">
+<script language="JavaScript" type="text/javascript">
+
+<!--
+
+ctxt_ad_partner = "4068709950";
+
+ctxt_ad_section = "20144";
+
+ctxt_ad_bg = "";
+
+ctxt_ad_width = 468;
+
+ctxt_ad_height = 60;
+
+ctxt_ad_bc = "E9E9E9";
+
+ctxt_ad_cc = "FEFEFE";
+
+ctxt_ad_lc = "3366AA";
+
+ctxt_ad_tc = "333333";
+
+ctxt_ad_uc = "003399";
+
+// -->
+
+</script>
+
+<script language="JavaScript" type="text/javascript" src="http://ypn-js.overture.com/partner/js/ypn.js"></script>
+</p>
+
+<h2><a id="DEFINITION" name="DEFINITION">Qu’est-ce qu’un cache Web ? À quoi servent-ils ?</a></h2>
+<p>Un <em>cache Web</em> se tient entre un ou plusieurs serveurs Web (appelés aussi <em title="N.d.T. origin servers">serveurs originaux</em>)
+et un ou plusieurs clients, et il observe le va-et-vient des requêtes en enregistrant pour lui-même des copies des réponses
+&#8212; comme des pages HTML, des images et des fichiers (appelés collectivement des <em title="N.d.T. representations">représentations</em>). Par la suite,
+s'il se présente une autre requête pour la même adresse URL, il pourra utiliser la réponse qu'il détient au lieu de la réclamer
+à nouveau au serveur original.</p>
+
+<p>On utilise des caches Web pour deux raisons principales :</p>
+<ul>
+  <li>Pour <strong>réduire le temps d'attente</strong> &#8212; Puisqu'on satisfait la requête à partir du cache (plus proche du client)
+  au lieu du serveur original, l'obtention de la représentation et son affichage prennent moins de temps. Le Web semble plus réactif.</li>
+  <li>Pour <strong>réduire le trafic des réseaux</strong> &#8212; Puisqu'on réutilise les représentations, la bande passante consommée
+  par le client est réduite. Si le client paye au débit, il économise de l'argent, et il contient ses besoins en bande passante et
+  les gère mieux.</li>
+</ul>
+
+<h2><a id="KINDS" name="KINDS">Les types de cache Web</a></h2>
+
+<h3><a id="BROWSER" name="BROWSER">Les caches de navigateurs</a></h3>
+<p>Si vous examinez le boîte de dialogue des préférences d'un navigateur Web moderne (comme
+Internet Explorer, Safari ou Mozilla), vous remarquerez probablement un réglage de « cache ».
+Il vous permet de consacrer une partie du disque dur de votre ordinateur au stockage des représentations que vous avez vu, juste pour vous.
+Le cache du navigateur fonctionne selon des règles plutôt simples. Il vérifiera la fraîcheur des représentations, habituellement une fois
+par session (c'est-à-dire, pour l'invocation actuelle du navigateur).</p>
+
+<p>Ce cache est particulièrement utile lorsque l'utilisateur actionne le bouton « retour » ou clique un lien pour voir une page qu'il
+vient juste de visiter. De même, si vous utilisez les mêmes images pour la navigation dans tout votre site, elles seront servies depuis
+le cache du navigateur presque instantanément.</p>
+
+<h3><a id="PROXY" name="PROXY">Les caches de serveurs mandataires</a></h3>
+
+<p>Les caches de <span title="N.d.T. proxy servers">serveurs mandataires</span> Web fonctionnent selon le même principe mais sur une échelle beaucoup plus vaste.
+Les mandataires servent des centaines ou des milliers d'utilisateurs de la même façon ; les grandes entreprises et les
+fournisseurs d'accès Internet les mettent souvent en place sur leurs pare-feux, ou comme dispositifs autonomes
+(appelés aussi <em title="N.d.T. intermediaries">intermédiaires</em>).</p>
+
+<p>Puisque les caches de mandataires ne font pas partie du client ou du serveur original, mais se trouvent plutôt ailleurs
+dans le réseau, les requêtes doivent leur être envoyées d'une façon ou d'une autre. L'un des moyens d'y parvenir est d'utiliser le
+réglage de mandataire de votre navigateur pour lui indiquer lequel utiliser ; un autre moyen est d'utiliser l'interception.
+Les requêtes Web sont redirigées aux <em title="N.d.T. interception proxies">serveurs mandataires d'interception</em> par le réseau sous-jacent même, de sorte qu'il n'est pas
+nécessaire de configurer les clients pour eux, ou même qu'ils connaissent leur existence.</p>
+
+<p>Les caches de mandataires appartiennent à un type de <em title="N.d.T. shared cache">cache partagé</em> ; plutôt que d'avoir un seul utilisateur, ils en ont
+habituellement un grand nombre et, pour cette raison, ils sont très bons pour réduire l'attente et le trafic des réseaux.
+Parce que les représentations populaires sont réutilisées plusieurs fois.</p>
+
+<h3><a id="GATEWAY" name="GATEWAY">Les caches de passerelles</a></h3>
+
+<p>Connus aussi comme « serveurs caches inverses » ou « caches auxilliaires », les <span title="N.d.T. gateway caches">caches de passerelles</span> sont également des
+intermédiaires, mais au lieu d'être déployés par les administrateurs de réseaux pour économiser la bande passante, ils le sont typiquement
+par les webmestres mêmes, pour rendre leurs sites plus extensibles, fiables, et avec de meilleures performances.</p>
+
+<p>Les requêtes peuvent être routées aux caches de passerelles selon plusieurs méthodes, mais on se sert d'une certaine forme
+d'équilibrage de charge afin qu'une ou plusieurs d'entre elles passent pour le serveur original auprès des clients.</p>
+
+<p>Des <em>réseaux de diffusion de contenu</em> (<abbr lang="en" title="Content Delivery Network">CDN</abbr>) distribuent des
+caches de passerelles dans tout l'Internet (ou dans une partie) et vendent de la mise en cache aux sites Web intéressés.
+<a href="http://www.akamai.com/speedera/" class="offsite">Speedera</a> et <a href="http://www.akamai.com/" class="offsite">Akamai</a>
+sont des exemples de réseaux de diffusion de contenu.</p>
+
+<p>Ce tutoriel se concentre essentiellement sur les caches de navigateurs et de mandataires, quoiqu'une partie des informations
+puisse également convenir pour ceux intéressés par les caches de passerelles.</p>
+
+<h2><a id="WHY" name="WHY">Les caches Web ne sont-ils pas mauvais pour moi ? Pourquoi devrais-je les aider ?</a></h2>
+
+<p>La mise en cache est l'une des technologies les plus méconnues sur l'Internet. Les webmestres notamment craignent de perdre
+le contrôle de leurs sites, au motif qu'un serveur cache peut les « dissimuler » à leurs utilisateurs,
+en rendant difficile l'identification de celui qui utilise le site.</p>
+
+<p>Malheureusement pour eux, même si les caches Web n'existaient pas, l'Internet est régi par trop de variables pour garantir
+l'obtention d'une image exacte de la façon dont les utilisateurs voient leurs sites. Si c'est un gros souci pour vous,
+ce tutoriel vous apprendra à obtenir les statistiques dont vous avez besoin, sans rendre votre site inamical aux caches.</p>
+
+<p>Un autre souci est celui selon lequel les caches sont susceptibles de servir du contenu périmé, ou <em title="N.d.T. stale">vieux</em>.
+Au contraire, ce tutoriel peut vous montrer comment configurer votre serveur afin de contrôler la mise en cache de votre contenu.</p>
+
+<p class="callout right">Les réseaux de diffusion de contenu (<abbr>CDN</abbr>) constituent un développement intéressant car
+à la différence de beaucoup de serveurs caches, leurs passerelles caches s'accordent aux intérêts des sites Web mis en cache,
+de sorte que ces problèmes n'ont pas lieu. Par contre, même si vous utilisez un réseau CDN, vous devez toujours tenir compte du fait
+qu'il y aura des serveurs caches et des caches de navigateurs en aval.</p>
+
+<p>Inversement, si vous planifiez bien votre site, les caches peuvent aider au chargement plus rapide de votre site, et limiter la charge
+sur votre serveur et votre lien Internet. La différence peut être considérable : un site difficile à mettre en cache peut prendre
+plusieurs secondes à charger tandis qu'un autre exploitant avantageusement la mise en cache semblera peut-être instantané en comparaison.
+Les utilisateurs apprécieront un site à chargement rapide et le visiteront plus souvent.</p>
+
+<p>Voyez-le sous cet angle : beaucoup de grandes compagnies de l'Internet dépensent des millions de dollars à installer des
+<span title="N.d.T. server farms">grappes de serveurs</span> répartis dans le monde pour copier leur contenu, afin d'en rendre l'accès aussi rapide que possible pour leurs utilisateurs.
+Les caches font la même chose pour vous et ils se trouvent encore plus près de l'utilisateur final. Et cerise sur le gateau,
+vous n'avez rien à payer.</p>
+
+<p>Le fait est que des caches de mandataires et de navigateurs seront utilisés, que ça vous plaise ou non. Si vous ne configurez pas
+votre site pour sa bonne mise en cache, il le sera selon les paramètres par défaut qu'aura décidé l'administrateur du cache.</p>
+
+<h2><a id="WORK" name="WORK">Comment fonctionnent les caches Web</a></h2>
+
+<p>Tous les caches possèdent un jeu de règles qu'ils utilisent pour déterminer quand servir une représentation du cache, si celle-ci
+est disponible. Certaines de ces règles sont fixées dans les protocoles (HTTP 1.0 et 1.1), et d'autres par l'administrateur du cache
+(que ce soit l'utilisateur du cache de navigateur, ou l'administrateur du mandataire).</p>
+
+<p>Généralement parlant, il s'agit des règles suivies le plus couramment (ne vous inquiétez pas si les détails vous échappent,
+l'explication suit) :</p>
+
+<div class="ol">
+<ol>
+  <li>Si les en-têtes de la réponse disent au cache de ne pas la garder, il ne le fait pas ;</li>
+  <li>Si aucun validateur (une en-tête <code>ETag</code>, ou <code>Last-Modified</code>) n'est présent dans la réponse, elle sera considérée comme ne pouvant être caché ;</li>
+  <li>Si la requête est authentifiée ou sécurisée, elle n'est pas mise en cache.</li>
+  <li>Une représentation en cache est censée être <em title="N.d.T. fresh">fraîche</em> (c'est-à-dire, prête à être envoyée à un client
+  sans vérification auprès du serveur original) si :
+    <ul>
+      <li>Aucune en-tête de date d'expiration ou autre contrôle de date ne lui a été attribuée,
+      et elle est toujours dans la période de fraîcheur ;</li>
+      <li>Le cache du navigateur, réglé pour une vérification une fois par session, a déjà vu la représentation ;</li>
+      <li>Un cache de mandataire a vu la représentation récemment, celle-ci ayant été modifié il y a relativement longtemps.</li>
+    </ul>
+    Les représentations fraîches sont servies directement depuis cache, sans vérification auprès du serveur original.</li>
+  <li>Si une représentation est vieille, le serveur original sera interrogé afin de la <em>valider</em>, ou de dire au cache si
+  la copie est toujours bonne ou pas.</li>
+</ol>
+</div>
+
+<p>La <em>fraîcheur</em> et la <em>validation</em> sont les moyens les plus importants du cache pour travailler avec le contenu.
+Une représentation fraîche sera instantanément disponible dans le cache, tandis qu'une représentation validée évitera de l'envoyer
+à nouveau entièrement si elle n'a pas changé.</p>
+
+<h2><a id="CONTROL" name="CONTROL">Comment contrôler les caches (ou ne pas les contrôler)</a></h2>
+
+<p>Les concepteurs Web et les webmestres disposent de plusieurs outils pour afiner le traitement de leurs sites par les caches.
+Il faudra peut-être mettre les mains dans la configuration de votre serveur, mais le jeu en vaut la chandelle. Pour des précisions
+à propos de l'utilisation de ces outils avec votre serveur, cf. les sections ci-après concernant la <a href="#IMP-SERVER">mise en œuvre</a>.</p>
+
+<h3><a id="META" name="META">Les balises Meta HTML et les en-têtes HTTP</a></h3>
+
+<p>Les auteurs HTML peuvent placer, dans la section &lt;HEAD&gt; d'un document, des balises qui en décrivent les attributs.
+On utilise souvent ces <em>balises meta</em> dans la croyance qu'elles peuvent marquer le document comme non cachable, ou le faire
+expirer à une date donnée.</p>
+
+<p>Les balises meta sont faciles à utiliser mais ne sont pas très efficaces. Car elles ne sont respectées que par
+quelques caches de navigateurs (qui lisent réellement le code HTML), pas par les caches mandataires (qui ne lisent quasiment jamais le
+code HTML dans le document). Quoiqu'on puisse être tenté de placer une balise meta « <code>Pragma: no-cache</code> » dans une page Web,
+elle ne sera pas toujours tenue fraîche pour autant.</p>
+
+<p class="callout right">Si votre site est hébergé chez un fournisseur d'accès Internet, ou dans une grappe de serveurs, ne vous
+donnant pas la possibilité de fixer arbitrairement les en-têtes HTTP (comme <code>Expires</code> et <code>Expires</code>), réclamez-la avec force ;
+ce sont des outils indispensables pour faire votre travail.</p>
+
+<p>En effet, les <em>en-têtes HTTP</em> véritables vous donnent un grand pouvoir sur la façon dont les caches de navigateurs et les
+mandataires gèrent vos représentations. Elles sont invisibles dans le code HTML et sont habituellement générée par le serveur Web.
+Toutefois, ce contrôle s'exerce à un certain degré, selon le serveur utilisé. Dans les sections suivantes, vous verrez quelles sont
+les en-têtes HTTP intéressantes et comment les appliquer à votre site.</p>
+
+<p>Les en-têtes HTTP sont envoyées par le serveur, avant le HTML, et sont seulement vues par le navigateur et les caches intermédiaires.
+Une réponse HTTP 1.1 typique se présenterait comme ceci :</p>
+<pre class="example">HTTP/1.1 200 OK
+Date: Fri, 30 Oct 1998 13:19:41 GMT
+Server: Apache/1.3.3 (Unix)
+Cache-Control: max-age=3600, must-revalidate
+Expires: Fri, 30 Oct 1998 14:19:41 GMT
+Last-Modified: Mon, 29 Jun 1998 02:28:12 GMT
+ETag: "3e86-410-3596fbbc"
+Content-Length: 1040
+Content-Type: text/html</pre>
+
+<p>Le code HTML suit ces en-têtes séparé par une ligne vide. Cf. les sections concernant la
+<a href="#IMP-SERVER">mise en œuvre</a> pour des informations sur le paramétrage des en-têtes HTTP.</p>
+
+<h3><a id="PRAGMA" name="PRAGMA">Les en-têtes HTTP <code>Pragma</code> (et pourquoi elles ne fonctionnent pas)</a></h3>
+
+<p>Beaucoup de personnes croient qu'assigner une en-tête HTTP <code>Pragma: no-cache</code> à une représentation la rendra non cachable.
+Ce n'est pas toujours vrai : la spécification HTTP n'établit aucune directive pour les en-têtes de réponse <code>Pragma</code>, et traite plutôt
+des en-têtes de requête <code>Pragma</code> (les en-têtes envoyées au serveur par le navigateur). Bien que certains caches honorent cette en-tête,
+ce n'est pas le cas de la majorité, et elle n'aura aucun effet. Utilisez plutôt les en-têtes qui suivent.</p>
+
+<h3><a id="EXPIRES" name="EXPIRES">Le contrôle de la fraîcheur avec l'en-tête HTTP <code>Expires</code></a></h3>
+
+<p>L'en-tête HTTP <code>Expires</code> représente un moyen élémentaire pour contrôler les caches : elle indique à tous les caches pour combien de temps
+la représentation associée reste fraîche. Après échéance, les caches vérifieront toujours auprès du serveur original si le document
+a changé. Les en-têtes <code>Expires</code> sont reconnues par pratiquement tous les caches.</p>
+
+<p>La plupart des serveurs Web permettent de régler les en-têtes de réponse <code>Expires</code> de plusieurs façons. Ils permettent communément de
+fixer une date d'expiration absolue, une date basée sur celle de la dernière représentaiton vue par le client (dernière <em>date d'accès</em>),
+ou une date basée sur celle de la dernière modification du document sur votre serveur (dernière <em>date de modification</em>.</p>
+
+<p>Les en-têtes <code>Expires</code> conviennent tout particulièrement à la mise en cache des images statiques (comme les barres et boutons de navigation).
+Puisqu'elles ne changent pas beaucoup, vous pouvez leur donner des dates d'expiration extrêmement éloignées, en rendant votre site
+beaucoup plus réactif à vos utilisateurs. Les en-têtes sont aussi utile pour contrôler la mise en cache d'une page qui change régulièrement.
+Par exemple, si vous mettez quotidiennement à jour une page de nouvelles à six heures du matin, vous pouvez fixer l'expiration de la
+représentation à cette heure, de sorte que les caches sauront quand obtenir une copie fraîche, sans que les utilisateurs aient à cliquer
+sur « recharger ».</p>
+
+<p>La <strong>seule</strong> valeur admise dans une en-tête <code>Expires</code> est une date HTTP, tout autre chose sera probablement interprété comme
+une date « dans le passé », la représentation n'étant donc pas cachable. Rappelez-vous aussi que l'heure d'une date HTTP est relative au
+temps <abbr lang="en" title="Greenwich Mean Time">GMT</abbr>, non au temps local.</p>
+
+<p>Par exemple :</p>
+<pre><span class="example">Expires: Fri, 30 Oct 1998 14:19:41 GMT</span></pre>
+
+<p class="callout right">Il importe de s'assurer que l'horloge de votre serveur Web soit juste pour utiliser l'en-tête <code>Expires</code>.
+Un moyen d'y parvernir consiste à utiliser le <a class="offsite" href="http://www.ntp.org/">protocole de date de réseau</a>
+(<abbr lang="en" title="Network Time Protocol">NTP</abbr>) ; parlez-en à votre administrateur de système local pour en savoir plus.</p>
+
+<p>Quoique l'en-tête <code>Expires</code> soit utile, elle a quelques limitations. D'abord, puisqu'il est question d'une date, les horloges du
+serveur Web et du cache doivent être synchronisées ; si leurs interprétations du temps sont différentes, on n'obtiendra pas le
+résultat escompté, et les caches pourraient, à tort, estimer frais un contenu périmé.</p>
+
+<p>Un autre problème avec <code>Expires</code> est qu'il est facile d'oublier que l'on a fixé une date d'expiration particulière à un certain contenu.
+Si vous ne réactualisez pas une date <code>Expires</code> avant échéance, toutes les requêtes iront à votre serveur Web,
+en augmentant la charge et le temps d'attente.</p>
+
+<h3><a id="CACHE-CONTROL" name="CACHE-CONTROL">Les en-têtes HTTP <code>Cache-Contro</code></a></h3>
+
+<p>HTTP 1.1 a introduit la nouvelle classe d'<em>en-têtes de réponse Cache-Control</em> afin de donner plus de contrôle aux
+éditeurs Web sur leur contenu et de corriger les limitations de l'en-tête <code>Expires</code>.</p>
+
+<p>Les en-têtes de réponse <code>Cache-Control</code> utiles sont les suivantes :</p>
+
+<ul>
+  <li><strong>max-age=</strong>[secondes] &#8212; indique la quantité de temps maximale où la représentation sera considérée fraîche.
+  Similaire à <code>Expires</code>, cette directive est relative à l'heure de la requête au lieu d'être absolue. La valeur [secondes] est le
+  nombre de secondes, à compter de l'heure de la requête, pour lequel vous désirez que la représentation soit fraîche.</li>
+  <li><strong>s-maxage=</strong>[secondes] &#8212; similaire à max-age, sauf qu'elle ne s'applique qu'aux caches partagés (par exemple,
+  un mandataire).</li>
+  <li><strong>public</strong> &#8212; marque les réponses authentifiées comme cachables ; normalement, si une authentification HTTP est
+  demandée, les réponses sont automatiquement non cachables.</li>
+  <li><strong>no-cache</strong> &#8212; force à chaque fois les caches à soumettre la requête au serveur original pour validation avant libération
+  d'une copie cachée. C'est utile pour s'assurer du respect de l'authentification (en combinaison avec <code>public</code>), ou pour maintenir une
+  fraîcheur rigide, sans sacrifier tous les bénéfices de la mise en cache.</li>
+  <li><strong>no-store</strong> &#8212; instruit les caches de ne pas garder de copie de la représentation dans toutes les conditions.</li>
+  <li><strong>must-revalidate</strong> &#8212; indique aux caches de devoir obéir à toute information de fraîcheur que vous leur donnez
+  à propos d'une représentation. HTTP permet aux caches de servir des représentations périmées sous certaines conditions ; en indiquant
+  cette en-tête, vous dites au cache que vous voulez un respect strict de vos règles.</li>
+  <li><strong>proxy-revalidate</strong> &#8212; similaire à <code>must-revalidate</code>, sauf qu'elle ne s'applique qu'aux caches de mandataires.</li>
+</ul>
+
+<p>For example:</p>
+<pre><span class="example">Cache-Control: max-age=3600, must-revalidate</span></pre>
+
+<p>Si vous pensez utiliser les en-têtes <code>Cache-Control</code>, vous devriez consulter l'excellente documentation dans HTTP 1.1 ;
+cf. <a href="#REF">Références et autres informations</a>.</p>
+
+<h3><a id="VALIDATE" name="VALIDATE">Les validateurs et la validation</a></h3>
+
+<p class="ad right">
+<script language="JavaScript" type="text/javascript">
+
+<!--
+
+ctxt_ad_partner = "4068709950";
+
+ctxt_ad_section = "20144";
+
+ctxt_ad_bg = "";
+
+ctxt_ad_width = 250;
+
+ctxt_ad_height = 250;
+
+ctxt_ad_bc = "E9E9E9";
+
+ctxt_ad_cc = "FEFEFE";
+
+ctxt_ad_lc = "3366AA";
+
+ctxt_ad_tc = "333333";
+
+ctxt_ad_uc = "003399";
+
+// -->
+
+</script>
+
+<script language="JavaScript" type="text/javascript"
+
+src="http://ypn-js.overture.com/partner/js/ypn.js">
+
+</script>
+
+</p>
+
+<p>Dans la section <a href="#WORK">Comment fonctionnent les caches Web</a>, nous disions que les serveurs et les caches utilisaient
+une validation pour communiquer le fait qu'une représentation avait changé. Cette validation permet d'éviter aux caches de devoir télécharger
+la représentation entière, lorsqu'ils en ont une copie locale mais dont ils ne sont pas sûrs de la fraîcheur.</p>
+
+<p>Les validateurs sont très importants : si aucun n'est présent et si aucune information de fraîcheur (<code>Cache-Control</code> ou <code>Expires</code>)
+n'est disponible, les caches ne stockeront aucune représentation du tout.</p>
+
+<p>Le validateur le plus courant est la date de dernière modification du document, communiquée par l'en-tête <code>Last-Modified</code>.
+Lorsque le cache stocke une représentation incluant une en-tête <code>Last-Modified</code>, il peut s'en servir pour interroger le serveur,
+avec une requête <code>If-Modified-Since</code>, afin de savoir si la représentation a changé depuis la dernière fois où elle a été vue.</p>
+
+<p>HTTP 1.1 a introduit un nouveau type de validateur appelé <code>ETag</code>. Les <code>ETag</code> sont des identificateurs uniques générés par le serveur
+et changés à chaque fois que la représentation change. Puisque le serveur contrôle la génération de <code>Etag</code>, les caches ont l'assurance
+que, si l'<code>Etag</code> correspond à leurs requêtes <code>If-None-Match</code>, la représentation est réellement la même.</p>
+
+<p>Presque tous les caches se servent de dates <code>Last-Modified</code> pour déterminer si la représentation est fraîche ; la validation <code>Etag</code>
+devient aussi prévalente.</p>
+
+<p>La plupart des serveurs Web modernes généreront automatiquement à la fois des validateur <code>ETag</code> et <code>Last-Modified</code> pour du contenu statique
+(c.à.d. des fichiers) ; vous n'aurez rien à faire. Par contre, pour du contenu dynamique (comme les sites avec CGI, ASP et bases de données),
+ils n'en savent pas assez pour les générer ; cf. <a href="#SCRIPT">Écrire des scripts compatibles avec les caches</a>.</p>
+
+<h2><a id="TIPS" name="TIPS">Astuces pour construire un site compatible avec les caches</a></h2>
+
+<p>Hormis utiliser des informations de fraîcheur et une validation, il y a beaucoup de choses à faire pour rendre votre site plus
+convivial aux caches :</p>
+<ul>
+  <li><strong>Utilisez des adresse URL de manière cohérente</strong> &#8212; c'est la règle d'or de la mise en cache. Si vous servez le
+  même contenu dans des pages différentes, à des utilisateurs différents, ou depuis des sites différents, il devrait avoir la même
+  adresse URL. C'est le moyen le plus facile et le plus efficace pour rendre votre site convivial aux caches. Par exemple, si vous utilisez
+  une première fois « /index.html » dans votre code HTML comme appel, utilisez-le toujours de cette façon ;</li>
+  <li><strong>Utilisez une bibliothèque commune d'images</strong> et d'autres éléments, et appelez-les depuis des endroits différents ;</li>
+  <li><strong>Faites que les caches stockent les images et les pages ne changeant pas souvent</strong> en utilisant une en-tête 
+  <code>Cache-Control: max-age</code> avec une grande valeur ;</li>
+  <li><strong>Faites que les caches reconnaissent les pages mises à jour régulièrement</strong> en indiquant
+  un max-age ou une date d'expiration appropriés ;</li>
+  <li><strong>Si une ressource (un fichier téléchargeable spécialement) change, changez son nom</strong>. De cette manière,
+  vous pouvez la faire expirer loin dans le future, tout en garantissant le service de la version correcte ; seule la page qui mène à elle
+  a besoin d'une date d'expiration proche ;</li>
+  <li><strong>Ne changez pas les fichiers sans nécessité</strong>. Si vous le faites, tout aura une date <code>Last-Modified</code> faussement récente.
+  Par exemple, lors d'une mise à jour de votre site, ne recopiez pas le site entier ; déplacez juste les fichiers que vous aurez changé ;</li>
+  <li><strong>Utilisez des cookies seulement si nécessaire</strong> &#8212; les cookies sont difficiles à cacher et ne sont pas nécessaires
+  dans la plupart des situations. Si vous devez utiliser un cookie, limitez-en l'usage aux pages dynamiques ;</li>
+  <li><strong>Minimisez l'utilisation de SSL</strong> &#8212; parce que les pages chiffrées ne sont pas stockées par les caches partagés,
+  ne les utilisez que quand il le faut, et utilisez avec parcimonie les images dans les pages SSL ;</li>
+  <li><strong>Utilisez le <a href="http://www.mnot.net/cacheability/">Cacheability Engine</a></strong> &#8212; il peut vous aider
+  à mettre en pratique plusieurs des concepts de ce tutoriel.</li>
+</ul>
+
+<h2><a id="SCRIPT" name="SCRIPT">Écrire des scripts compatibles avec les caches</a></h2>
+
+<p>Par défaut, la plupart des scripts ne retourneront pas de validateur (par exemple, une en-tête HTTP <code>Last-Modified</code>, ou <code>Etag</code>)
+ni d'informations de fraîcheur (<code>Cache-Control</code> ou <code>Expires</code>). Tandis que quelques scripts sont vraiment dynamiques (c'est-à-dire qu'ils
+retournent une réponse différente à chaque requête), beaucoup (comme les moteurs de recherche et les sites menés par base de données)
+peuvent bénéficier à être conviviaux aux caches.</p>
+
+<p>Généralement parlant, si un script produit une sortie reproductible pour la même requête à une date ultérieure (qu'il s'agisse
+de minutes ou de jours plus tard), elle devrait être cachable. Si le contenu du script change seulement en fonction du contenu de
+l'adresse URL, il est cachable ; si la sortie dépend d'un cookie, d'informations d'authentification ou d'autres critères externes,
+elle ne l'est probablement pas.</p>
+<ul>
+  <li>La meilleure façon de rendre un script convivial aux caches (ainsi que plus performant) est de vider son contenu dans
+  un fichier simple à chaque fois qu'il change. Le serveur Web peut alors le traiter comme n'importe quelle autre page Web, en générant
+  et utilisant des validateurs, ce qui facilite votre vie. Rappelez-vous d'écrire seulement les fichiers qui auront changés, pour
+  préserver les dates <code>Last-Modified</code>.</li>
+  <li>Une autre façon de rendre un script cachable dans une certaine mesure est de fixer une en-tête d'âge relatif aussi loin dans le
+  futur que pratique. Bien qu'on puisse y parvenir avec <code>Expires</code>, il est probablement plus facile de le faire avec
+  <code>Cache-Control: max-age</code>, ce qui gardera la représentation fraîche pendant un certain laps de temps après la requête.</li>
+  <li>Si vous ne pouvez pas le faire, il faudra faire générer un validateur au script, et répondre ensuite aux requêtes
+  <code>If-Modified-Since</code> et/ou <code>If-None-Match</code>. On y parvient en analysant les en-têtes HTTP et en répondant alors avec un code
+  304 Non Modifié quand c'est approprié. Ce n'est malheureusement pas une tâche facile.</li>
+</ul>
+
+<p>Quelques autres astuces :</p>
+<ul>
+  <li><strong>N'utilisez pas POST</strong> sauf si nécessaire. Les réponses de la méthode POST ne sont pas conservées par la plupart
+  des caches ; si vous passez des informations par le chemin ou la requête (via GET), les caches peuvent stocker ces informations
+  pour la suite ;</li>
+  <li><strong>N'incorporez pas d'informations spécifiques de l'utilisateur dans l'adresse URL</strong> à moins que le contenu généré soit
+  complètement unique à cet utilisateur ;</li>
+  <li><strong>Ne comptez pas sur le fait que toutes les requêtes d'un utilisateur proviennent d'un seul hôte</strong> parce que les caches
+  travaillent souvent de concert ;</li>
+  <li><strong>Générez des en-têtes de réponse <code>Content-Length</code></strong>. C'est facile à faire et permet d'utiliser la réponse
+  de votre script dans une <em>connexion persistente</em>. Cela permet aux clients de demander plusieurs représentations en une seule
+  connexion TCP/IP, au lieu d'établir une connexion à chaque requête. Votre site semblera plus rapide.</li>
+</ul>
+
+<p>Cf. les <a href="#IMP-SCRIPT">Notes de mise en œuvre</a> pour des précisions.</p>
+
+<h2><a id="FAQ" name="FAQ">Foire aux questions</a></h2>
+
+<h3>Quelles choses les plus importantes faut-il rendre cachables ?</h3>
+
+<p>Une bonne stratégie consiste à identifier les représentations les plus volumineuses et les plus populaires (en particulier les images)
+et de commencer d'abord par elles.</p>
+
+<h3>Comment rendre mes pages aussi vives que possibles avec les caches ?</h3>
+
+<p>La représentation la plus cachable est celle dont la durée de fraîcheur est longue. La validation aide bien à réduire le temps pris pour
+voir une représentation, mais le cache doit quand même contacter le serveur original pour connaître sa fraîcheur. Si le cache la
+connaît déjà, la représentation sera servie directement.</p>
+
+<h3>Je comprend que la mise en cache est bonne, mais j'ai besoin de tenir des statistiques sur le nombre de personnes qui visitent ma page !</h3>
+
+<p>Si vous devez connaître le nombre d'accès à une page, sélectionnez UN SEUL petit élément de celle-ci (ou la page même), et rendez-la
+cachable en lui donnant les en-têtes appropriées. Par exemple, vous pourriez appeler une image 1 &times; 1 transparente non cachable dans
+chaque page. L'en-tête Referer contiendra des informations à propos de la page qui l'aura appelée.</p>
+
+<p>Sachez que même cette méthode ne donnera pas de statistiques vraiment précises concernant vos utilisateurs, et elle nuit à l'Internet
+et à vos utilisateurs, car elle génère du trafic superflu et force les personnes à attendre le téléchargement de l'élément non caché.
+Pour plus de renseignements à ce sujet, cf. « On Interpreting Access Statistics » dans les <a href="#REF">références</a>.</p>
+
+<h3>Comment puis-je voir les en-têtes HTTP d'une représentation ?</h3>
+
+<p>Beaucoup de navigateurs Web vous permettent de voir la valeur des en-têtes <code>Expires</code> et <code>Last-Modified</code> dans des
+« Informations sur la page » ou une interface similaire. Si c'est le cas, vous obtiendrez un menu de la page et de toutes les représentations
+(comme les images) qui lui sont associées, en même temps que les détails les concernant.</p>
+
+<p>Pour voir les en-têtes complètes d'une représentation, vous pouvez vous connecter manuellement au serveur Web
+en utilisant un client Telnet.</p>
+
+<p>Pour cela, il vous faudra peut-être saisir le port (par défaut, le port 80) dans un champs à part, ou vous connecter au serveur par
+www.myhost.com:80 ou www.myhost.com 80 (notez l'espace). Consultez la documentation de votre client Telnet.</p>
+
+<p>Une fois la connexion au site établie, tapez une requête pour la représentation. Par exemple, si vous voulez voir les en-têtes de
+http://www.myhost.com/foo.html, connectez-vous à to www.myhost.com, port 80, et tapez :</p>
+<pre class="example">GET /foo.html HTTP/1.1 [retour]
+Host: www.myhost.com [retour][retour]</pre>
+
+<p>Appuyez la touche « Retour chariot » pour chaque [retour] ; assurez-vous de l'appuyer deux fois à la fin. Cela affichera les en-têtes
+puis la représentation entière. Pour les en-têtes seulement, remplacez GET par HEAD.</p>
+
+<h3>Mes pages sont protégées par un mot de passe. Comment les caches de mandataires s'en accomodent-ils ?</h3>
+
+<p>Par défaut, les pages protégées par authentification HTTP sont considérées comme privées ; les caches partagés ne les conserveront pas.
+Toutefois, vous pouvez rendre publiques des pages authentifiées avec une en-tête <code>Cache-Control:÷public</code> ; les caches compatibles
+avec HTTP 1.1 seront alors autorisés à les mettre en cache.</p>
+
+<p>Si vous souhaitez que ces pages soient cachables, mais toujours authentifiée pour chaque utilisateur, combinez les en-têtes
+<code>Cache-Control: public</code> et <code>no-cache</code>. Cela ordonne au cache de soumettre les informations d'authentification
+du nouveau client au serveur original avant de libérer la représentation du cache. Voici à quoi ça ressemble :</p>
+
+<pre><span class="example">Cache-Control: public, no-cache</span></pre>
+
+<p>Que ce soit le cas ou non, il vaut mieux minimiser l'utilisation de l'authentification ; par exemple, si vos images ne sont pas sensibles,
+placez-les dans un répertoire séparé et configurez votre serveur afin qu'il ne force pas l'authentification pour celui-ci. Les images
+seront ainsi naturellement cachables.</p>
+
+<h3>Dois-je m'inquiéter de la sécurité si des personnes accèdent à mon site au travers d'un cache ?</h3>
+
+<p>Les pages SSL ne sont pas cachées (ou déchiffrées) par les caches de mandataires, et vous ne devez donc pas vous en soucier. Par contre,
+puisque les caches stockent les requêtes non-SSL et les adresses URL récupérées par leur biais, vous devriez en tenir compte pour les
+sites non sécurisés ; un administrateur sans scrupule peut théoriquement réunir des informations concernant leurs utilisateurs,
+en particulier dans l'adresse URL.</p>
+
+<p>En fait, n'importe quel administrateur sur le réseau entre votre serveur et vos clients pourrait réunir ce type d'informations.
+Un problème particulier se pose lorsque les scripts CGI inscrivent les identifiants et les mots de passe dans l'adresse URL même ;
+il devient très facile à d'autres de trouver et d'utiliser cette identification.</p>
+
+<p>Si vous connaissez les problèmes entourant la sécurité sur le Web en général, vous ne devriez pas avoir de surprises de la part
+des caches de mandataires.</p>
+
+<h3>Je recherche une solution de publication Web intégrée. Quelles sont celles compatibles avec les caches ?</h3>
+
+<p>Ça dépend. Généralement parlant, plus la solution est complexe, plus elle est difficile à cacher. Les moins bonnes sont celles qui
+génèrent dynamiquement tout le contenu et ne fournissent pas de validateurs ; elles sont peut-être pas du tout cachable.
+Renseignez-vous auprès de l'équipe technique du vendeur, et voyez les « Notes de mise en œuvre » ci-dessous.</p>
+
+<h3>Mes images expirent dans un mois à partir de maintenant, mais je dois les changer dans le cache tout de suite !</h3>
+
+<p>L'en-tête <code>Expires</code> peut être contournées ; la copie en cache servira tant que le cache (du navigateur, ou bien du mandataire)
+ne manque pas de place et ne supprime les représentations, .</p>
+
+<p>La solution la plus efficace consiste à changer tous les liens vers elles ; des représentations complètement nouvelles seront ainsi
+chargées fraiches  du serveur original. Rappelez-vous que la page appelant la représentation sera aussi mise en cache. À cause de ça,
+il vaut mieux rendre les images statiques et les représentations similaires très cachables, en gardant un lien étroit sur les pages HTML
+qui les appellent</p>
+
+<p>Si vous souhaitez recharger une représentation d'un cache particulier, vous pouvez soit forcer le rechargement (dans Netscape,
+maintenir la touche majuscule appuyée tout en pressant « Rafraîchir ») le fera en envoyant une en-tête de requête
+<code>Pragma: no-cache</code>) au cours de l'utilisation du cache. Ou bien vous pouvez demander à l'administrateur du cache, par l'intermédiaire
+d'une interface, de supprimer la représentation.</p>
+
+<h3>J'exploite un service d'hébergement Web. Comment faire pour que mes utilisateurs publient des pages conviviales aux caches ?</h3>
+
+<p>Si vous utilisez Apache, laissez-les employer des fichiers .htacces en leur fournissant une documentation appropriée.</p>
+
+<p>Sinon vous pouvez établir des zones prédéterminées pour divers attributs de mise en cache dans chaque serveur virtuel. Par exemple,
+vous pourriez définir un répertoire « /cache-1m » à mettre en cache pour un mois après accès, et une zone « /no-cache » qui sera servie avec des
+en-têtes instruisant les caches de ne pas stocker les représentations qui en proviennent.</p>
+
+<p>Quoi que vous fassiez, il vaut mieux travailler d'abord avec vos clients les plus importants pour la mise en cache.
+L'essentiel des économies réalisées (en bande passante et en charge des serveurs) viendra des sites à gros volumes.</p>
+
+<h3>J'ai marqué mes pages comme cachables, mais mon navigateur continue à les demander à chaque requête.
+Comment forcer le cache à en garder des représentations ?</h3>
+
+<p>Les caches sont tenus de conserver une représentation et de la réutiliser ; ils sont seulement tenus de <strong>ne pas</strong> les
+garder ou les utiliser sous certaines conditions. Tous les caches prennent des décision concernant les représentations à garder en fonction
+de leur dimension, leur type (par exemple, image ou html), ou de l'espace restant pour conserver des copies locales. Vos représentations
+seront peut-être jugées d'intérêt moindre à garder comparées à des représentations plus populaires ou plus volumineuses.</p>
+
+<p>Certains caches offrent bien à leurs administrateurs la possibilité de privilégier les types de représentations à garder, d'autres
+d'« épingler » les représentations dans le cache, pour qu'elles soient toujours disponibles.</p>
+
+<h2><a id="IMP-SERVER" name="IMP-SERVER">Notes de mise en œuvre &#8212; Les serveurs Web</a></h2>
+
+<p>Généralement parlant, il vaut mieux utiliser la dernière version du serveur Web, quel qu'il soit, que vous avez choisi de déployer.
+Non seulement la nouvelle version présentera vraissemblablement plus de fonctionnalités conviviales pour les caches mais habituellement
+elle comportera aussi des améliorations importantes de la sécurité et des performances.</p>
+
+<h3>Le serveur HTTP Apache</h3>
+
+<p><a class="offsite" href="http://www.apache.org/">Apache</a> se sert de modules optionnels pour inclure les en-têtes,
+dont <code>Expires</code> et <code>Cache-Control</code>. Les deux modules sont disponibles à partir de la distribution version 1.2.</p>
+
+<p>Les modules doivent être construits dans Apache ; bien qu'inclus dans la distribution, ils ne sont pas activés par défaut.
+Pour voir si les modules sont opérationnels dans votre serveur, cherchez le programme httpd et exécutez <code>httpd -l</code>, ce qui devrait
+afficher la liste des modules disponibles. Les modules à rechercher sont mod_expires et mod_headers.</p>
+<ul>
+  <li>S'ils ne sont pas disponibles et que vous ayez un accès de niveau administrateur, vous pouvez recompiler Apache pour les inclure.
+  On y parvient soit en décommentant les lignes appropriées dans le fichier de configuration, soit en utilisant les arguments de
+  configuration <code>-enable-module=expires</code> et <code>-enable-module=headers</code> (à partir de la version 1.3). Cf. le fichier INSTALL
+  compris dans la distribution Apache.</li>
+</ul>
+
+<p>Apache et les modules appropriés une fois prêt, vous pouvez utiliser mod_expires pour définir quand doivent expirer les représentations,
+soit dans les fichiers .htaccess, soit dans le fichier access.conf du serveur. Vous pouvez définir l'expiration soit d'après la date d'accès,
+soit d'après la date de modification, et l'appliquer à un type de fichier ou par défaut. Cf. la
+<a class="offsite" href="http://httpd.apache.org/docs/1.3/mod/mod_expires.html">documentation du module</a> pour des précisions,
+et voyez votre gourou Apache local si vous avez des problèmes.</p>
+
+<p>Pour appliquer les en-têtes <code>Cache-Control</code>, vous vous servirez du module mod_headers qui permet de définir les en-têtes HTTP arbitraires
+d'une ressource. Cf. la <a class="offsite" href="http://httpd.apache.org/docs/1.3/mod/mod_headers.html">documentation de mod_headers</a>.</p>
+
+<p>Voici un fichier .htaccess d'exemple pour illustrer l'utilisation de quelques en-têtes :</p>
+<ul>
+  <li>Les fichiers .htaccess permettent aux éditeurs Web d'utiliser des commandes qui ne se trouvent normalement que dans les fichiers
+  de configuration. Ils agissent sur le contenu du répertoire où ils se trouvent et ses sous-répertoires. Parlez-en à l'administrateur de
+  votre serveur pour savoir s'ils sont activés.</li>
+</ul>
+<pre class="example">### activate mod_expires
+ExpiresActive On
+### Expire les .gif un mois après leur accès
+ExpiresByType image/gif A2592000
+### Expire tout le reste un jour après sa dernière modification
+### (utilisation de la syntaxe alternative)
+ExpiresDefault "modification plus 1 day"
+### Applique une en-tête Cache-Control à index.html
+&lt;Files index.html&gt;
+Header append Cache-Control "public, must-revalidate"
+&lt;/Files&gt;</pre>
+<ul>
+  <li>Remarquez que mod_expires calcule et insère automatiquement une en-tête <code>Cache-Control:max-age</code> si nécessaire.</li>
+</ul>
+
+<p>La configuration d'Apache 2.0 est très semblable à celle de la version 1.3 ; cf. la documentation de
+<a class="offsite" href="http://httpd.apache.org/docs/1.3/mod/mod_expires.html">mod_expires</a> et
+de <a class="offsite" href="http://httpd.apache.org/docs/1.3/mod/mod_headers.html">mod_headers</a> de la version 2.0 pour des précisions.</p>
+
+<h3>Microsoft IIS</h3>
+
+<p>Le serveur Internet Information Server (IIS) de <a class="offsite" href="http://www.microsoft.com/">Microsoft</a> permet très facilement
+de régler les en-têtes de manière quelque peu flexible. Remarquez que ce n'est possible qu'avec la version 4 du serveur, qui fonctionne
+seulement sur NT Server.</p>
+
+<p>Pour définir les en-têtes d'une zone du site, sélectionnez-la dans l'interface « Outils d'administration » et faites apparaître
+ses propriétés. Après avoir sélectionné l'onglet « En-têtes HTTP », vous devriez voir deux zones intéressantes :
+« Activer l'expiration de contenu » et « En-têtes HTTP personnalisées ». La première ne nécessite aucune explication, et la seconde peut
+servir à appliquer des en-têtes <code>Cache-Control</code>.</p>
+
+<p>Voir la section ASP suivante pour des informations concernant le réglage des en-têtes dans Active Server Pages. Il est également possible
+de régler les en-têtes à partir des modules ISAPI (cf. MSDN pour des précisions).</p>
+
+<h3>Netscape/iPlanet Enterprise Server</h3>
+
+<p>En ce qui concerne la version 3.6, le serveur Enterprise Server n'offre aucun moyen évident de fixer les en-têtes <code>Expires</code>. Par contre,
+il gère les caractéristiques HTTP 1.1 depuis la version 3.0. Les caches HTTP 1.1 (mandataire et navigateur) pourront donc tirer partie
+des réglages <code>Cache-Control</code> que vous ferez.</p>
+
+<p>Pour utiliser les en-têtes <code>Cache-Control</code>, choisissez « Gestion de contenu | Directives de contrôle des caches » dans le
+serveur d'administration. Puis, en vous servant du « Préleveur de ressource » (N.d.T. Resource Picker), choisissez le répertoire
+où vous voulez régler les en-têtes. Après le réglage, cliquez « OK ». Pour plus de renseignements, cf. le
+<a class="offsite" href="http://developer.netscape.com/docs/manuals/enterprise/admnunix/content.htm#1006282">manuel NES</a>.</p>
+
+<h2><a id="IMP-SCRIPT" name="IMP-SCRIPT">Notes de mise en œuvre &#8212; Les scripts côté-serveur</a></h2>
+
+<p class="callout right">Une chose à garder à l'esprit c'est qu'il est peut-être plus facile de régler les en-têtes HTTP auprès de
+votre serveur Web qu'avec le langage de script. Essayez les deux.</p>
+
+<p>Puisqu'avec les scripts côté-serveur l'accent est mis sur le contenu dynamique, cela ne donne pas de pages très cachables, même si
+le contenu pourrait l'être. Si votre contenu change souvent, mais pas à chaque accès de la page, pensez à placer une en-tête
+<code>Cache-Control: max-age</code> ; la plupart des utilisateurs reviennent sur les pages au cours d'une période de temps relativement courte.
+Par exemple, lorsque les utilisateurs appuient le bouton « retour », si aucun validateur ni information de fraîcheur sont disponibles,
+ils devront attendre le rechargement de la page depuis le serveur pour la voir.</p>
+
+<h3>CGI</h3>
+
+<p>Les scripts CGI sont l'un des moyens les plus populaires de générer du contenu. Vous pouvez facilement adjoindre des
+en-têtes de réponse HTTP en les ajoutant avant d'envoyer le corps. La plupart des mises en œuvre CGI vous imposent déjà de le faire pour
+l'en-tête <code>Content-Type</code>. Par exemple, en Perl :</p>
+
+<pre class="example">#!/usr/bin/perl
+print "Content-type: text/html\n";
+print "Expires: Thu, 29 Oct 1998 17:04:19 GMT\n";
+print "\n";
+### le corps du contenu suit ...</pre>
+
+<p>Puisque ce n'est que du texte, vous pouvez facilement générer des en-têtes <code>Expires</code> et d'autres relatives à une date avec
+les fonctions intégrées. C'est encore plus facile si vous utilisez <code>Cache-Control: max-age</code> :</p>
+
+<pre><span class="example">print "Cache-Control: max-age=600\n";</span></pre>
+
+<p>Cela rendra le script cachable pour les dix minutes suivant la requête, de sorte que, si l'utilisateur presse le bouton « retour »,
+la requête ne sera pas soumise à nouveau.</p>
+
+<p>La spécification CGI fait aussi que les en-têtes de requêtes envoyées par le client sont disponibles dans l'environnement du script ;
+la chaîne « HTTP_ » s'ajoute au début de chaque nom d'en-tête. Donc, si un client fait une requête <code>If-Modified-Since</code>, elle apparaîtra
+comme ceci :</p>
+
+<pre><span class="example">HTTP_IF_MODIFIED_SINCE = Fri, 30 Oct 1998 14:19:41 GMT </span></pre>
+
+<p>Cf. également la bibliothèque <a href="http://www.mnot.net/cgi_buffer/">cgi_buffer</a>, qui gère automatiquement la génération
+et la validation des en-têtes <code>ETag</code>, la génération de <code>Content-Length</code> et la compression <code>Content-Encoding: gzip</code> des scripts CGI pour Perl et
+Python en une ligne include. La version Python peut aussi servir pour envelopper des scripts CGI arbitraires.</p>
+
+<h3>Les inclusions côté-serveur (<abbr lang="en" title="Server Side Includes">SSI</abbr>)</h3>
+
+<p>Le script SSI (souvent utilisé avec l'extension .shtml) est l'un des premiers moyens ayant permis aux éditeurs Web d'amener
+du contenu dynamique dans les pages. On avait une forme limitée de script dans HTML en utilisant des balises spéciales dans les pages.</p>
+
+<p>La plupart des mises en œuvre SSI ne fixent pas de validateurs et, de ce fait, ne sont pas cachables. Par contre, les mises en œuvre
+Apache permettent aux utilisateurs d'indiquer quels fichiers SSI peuvent l'être, en réglant les permissions d'exécution de groupe sur les
+fichiers appropriés, combiné à la directive complète <code>XbitHack</code>. Pour plus de renseignements, cf. la
+<a class="offsite" href="http://httpd.apache.org/docs/1.3/mod/mod_include.html">documentation mod_include</a>.</p>
+
+<h3>PHP</h3>
+
+<p><a class="offsite" href="http://www.php.net/">PHP</a> est un langage de script côté-serveur qui, si construit dans le serveur, peut
+servir à incorporer des scripts au sein du code HTML de la page, un peu comme SSI, mais avec beaucoup plus d'options. PHP peut être utilisé
+comme un script CGI sur n'importe quel serveur Web (Unix ou Windows), ou comme un module Apache.</p>
+
+<p>Par défaut, les représentations traitées par PHP n'ont pas de validateurs et sont donc non cachables. Toutefois, les développeurs peuvent
+fixer des en-têtes HTTP au moyen de la fonction <code>header()</code>.</p>
+
+<p>Par exemple, ce code créera une en-tête <code>Cache-Control</code> ainsi qu'une en-tête <code>Expires</code> valide pendant trois jours :</p>
+<pre class="example">&lt;?php
+ Header("Cache-Control: must-revalidate");
+
+ $offset = 60 * 60 * 24 * 3;
+ $ExpStr = "Expires: " . gmdate("D, d M Y H:i:s", time() + $offset) . " GMT";
+ Header($ExpStr);
+?&gt;</pre>
+
+<p>Rappelez-vous que la function <code>header()</code> DOIT apparaître avant toute autre sortie.</p>
+
+<p>Comme vous le voyez, il faudra créer manuellement la date HTTP d'une en-tête <code>Expires</code> ; PHP n'offre aucune fonction qui le fasse pour vous
+(quoique les versions récentes l'ont rendue plus aisée, cf. la <a href="http://php.net/date" class="offsite">documentation de date de PHP</a>).
+Bien sûr, il est facile de fixer une en-tête <code>Cache-Control: max-age</code>, qui est tout aussi bonne pour la plupart des situations.</p>
+
+<p>Pour plus de renseignements, cf. l'<a class="offsite" href="http://www.php.net/manual/function.header.php">entrée dans le manuel de header</a>.</p>
+
+<p>Cf. également la bibliothèque <a class="offsite" href="http://www.mnot.net/cgi_buffer/">cgi_buffer</a>, qui gère automatiquement
+la génération et validation des en-têtes <code>ETag</code>, la génération de <code>Content-Length</code> et la compression <code>Content-Encoding: gzip</code>
+pour les scripts PHP en une seule ligne include.</p>
+
+<h3>Cold Fusion</h3>
+
+<p><a href="http://www.adobe.com/products/coldfusion/" class="offsite">Cold Fusion</a>,
+de <a class="offsite" href="http://www.adobe.com/">Adobe</a> est un moteur de script côté-serveur commercial, fonctionnant
+avec plusieurs serveurs Web sur Windows, Linux et plusieurs variantes Unix.</p>
+
+<p>Cold Fusion rend le réglage d'en-têtes HTTP arbitraires relativement aisé, avec la balise
+<code><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000270.htm" class="offsite">CFHEADER</a></code>. Malheureusement,
+leur exemple de réglage d'une en-tête <code>Expires</code>, comme ci-dessous, est un peu trompeur.</p>
+
+<pre><span class="example">&lt;CFHEADER NAME="Expires" VALUE="#Now()#"&gt;</span></pre>
+
+<p>Ça ne fonctionne pas comme on pourrait le croire, parce que le temps (dans ce cas, lorsque la requête est faite) n'est pas converti
+en une date HTTP valide ; à la place, elle s'affiche juste comme une représentation de l'objet Date/Time de Cold Fusion. La plupart
+des clients soit ignoreront cette valeur, soit la convertiront en une valeur par défaut, comme « January 1, 1970 ».</p>
+
+<p>Toutefois, Cold Fusion offre une fonction de formatage de date qui fera le travail :
+<code><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000483.htm" class="offsite">GetHttpTimeSTring</a></code>.
+En combinaison avec la fonction <code><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000437.htm" class="offsite">DateAdd</a></code>,
+il est facile de fixer des dates <code>Expires</code> ; nous fixons ici une en-tête déclarant que les représentations de la page expireront dans un mois :</p>
+
+<pre><span class="example">&lt;cfheader name="Expires" value="#GetHttpTimeString(DateAdd('m', 1, Now()))#"&gt;</span></pre>
+
+<p>Vous pouvez aussi vous servir de la balise CFHEADER pour fixer les en-têtes <code>Cache-Control: max-age</code> et d'autres.</p>
+
+<p>Rappelez-vous que les en-têtes des serveurs Web transitent (N.d.T. pass through) dans certains déploiements de Cold Fusion
+(tel que CGI) ; vérifiez le vôtre pour déterminer si vous pouvez vous en servir avantageusement, en réglant les en-têtes sur le serveur
+plutôt que dans Cold Fusion.</p>
+
+<h3>ASP</h3>
+
+<p class="callout right">Lors du réglage d'en-têtes HTTP depuis un script ASP, assurez-vous de placer les appels de la méthode <code>Response</code>
+avant toute génération HTML, ou bien d'utiliser <code>Response.Buffer</code> pour mettre en tampon la sortie. Notez aussi que certaines versions du
+serveur IIS fixe une en-tête <code>Cache-Control: private</code> sur les scripts ASP par défaut, qui doivent être déclarés <code>public</code>
+pour être cachables par les caches partagés.</p>
+
+<p>Les scripts ASP, construits dans IIS et disponibles aussi pour d'autres serveurs Web, vous permettent de régler les en-têtes HTTP.
+Par exemple, pour fixer une date d'expiration, vous pouvez utiliser les propriétés de l'objet <code>Response</code> :</p>
+
+<pre><span class="example">&lt;% Response.Expires=1440 %&gt;</span></pre>
+
+<p>En indiquant le nombre de minutes à compte de la requête pour faire expirer la représentation. De même, on peut fixer une
+date d'expiration absolue de cette façon (assurez-vous de formater correctement la date HTTP) :</p>
+
+<pre><span class="example">&lt;% Response.ExpiresAbsolute=#May 31,1996 13:30:15 GMT# %&gt;</span></pre>
+
+<p>On peut ajouter des en-têtes <code>Cache-Control</code> comme ceci :</p>
+
+<pre><span class="example">&lt;% Response.CacheControl="public" %&gt;</span></pre>
+
+<p>Dans ASP.NET, <code>Response.Expires</code> est déconseillé : la bonne façon de régler les en-têtes relatives aux caches est avec <code>Response.Cache</code> :</p>
+
+<pre class="example">Response.Cache.SetExpires ( DateTime.Now.AddMinutes ( 60 ) ) ;
+Response.Cache.SetCacheability ( HttpCacheability.Public ) ;</pre>
+
+<p>Cf. la <a class="offsite" href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpconaspoutputcache.asp">documentation MSDN</a>
+pour plus de renseignements.</p>
+
+<h2><a id="REF" name="REF">Références et autres informations</a></h2>
+
+<h3><a href="http://www.ietf.org/rfc/rfc2616.txt" class="offsite">Spécification HTTP 1.1</a></h3>
+
+<p>La spécification HTTP 1.1 décrit beaucoup d'extension pour rendre les pages cachables et c'est le guide qui fait autorité pour
+la mise en œuvre du protocole. Cf. les sections 13, 14.9, 14.21 et 14.25.</p>
+
+<h3><a class="offsite" href="http://www.web-caching.com/">Web-Caching.com</a></h3>
+
+<p>Une excellente introduction aux concepts de la mise en cache, avec des liens vers d'autres ressources en ligne.</p>
+
+<h3><a class="offsite" href="http://www.goldmark.org/netrants/webstats/">On Interpreting Access Statistics</a></h3>
+
+<p>Une déblatération informative de Jeff Goldberg selon laquelle pourquoi vous ne devriez pas compter sur les statistiques d'accès
+et les compteurs d'appels de fichiers.</p>
+
+<h3><a href="http://www.mnot.net/cacheability/">Cacheability Engine</a></h3>
+
+<p>En examinant les pages Web afin de déterminer comment elles interagissent avec les caches Web, le moteur est un bon outil de débogage
+et un auxilliaire de ce tutoriel.</p>
+
+<h3><a href="http://www.mnot.net/cgi_buffer/">Bibliothèque cgi_buffer</a></h3>
+
+<p>Une seule ligne include en Perl CGI, Python CGI et scripts PHP, qui gère automatiquement la génération et la validation des
+en-têtes <code>ETag</code>, la génération <code>Content-Length</code> et la compression <code>Content-Encoding: gzip</code>, et cela correctement. La version Python
+peut également servir d'enveloppe autour de scripts CGI arbitraires.</p>
+
+<h2><a id="ABOUT" name="ABOUT">À propos de ce document</a></h2>
+
+<p>Ce document est protégé &copy; 1998-2005 Mark Nottingham &lt;<a href="mailto:mnot@pobox.com">mnot@pobox.com</a>&gt;.
+
+<!-- Creative Commons License -->
+Ce travail est concédé sous licence <a class="offsite" href="http://creativecommons.org/licenses/by-nd-nc/2.0/">Creative Commons</a>.
+<!-- /Creative Commons License -->
+</p>
+
+<!--
+
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="">
+   <dc:type rdf:resource="http://purl.org/dc/dcmitype/Text" />
+   <license rdf:resource="http://creativecommons.org/licenses/by-nd-nc/2.0/" />
+</Work>
+
+<License rdf:about="http://creativecommons.org/licenses/by-nd-nc/2.0/">
+   <permits rdf:resource="http://web.resource.org/cc/Reproduction" />
+   <permits rdf:resource="http://web.resource.org/cc/Distribution" />
+   <requires rdf:resource="http://web.resource.org/cc/Notice" />
+   <requires rdf:resource="http://web.resource.org/cc/Attribution" />
+   <prohibits rdf:resource="http://web.resource.org/cc/CommercialUse" />
+</License>
+
+</rdf:RDF>
+
+-->
+
+<p>Si vous hébergez ce document en miroir, veuillez envoyer un courrier à l'adresse précedente afin d'être informé des mises à jour.</p>
+
+<p>Tous les noms de marques cités sont les propriétés de leurs détenteurs respectifs.</p>
+
+<p>Bien que l'auteur estime le contenu exact au moment de la publication, il n'assume aucune responsabilité pour lui, son application ou
+toute conséquence qui en découlerait. Si vous y trouvez des informations fausses, des erreurs ou des points qui demandent des éclaircissements,
+veuillez contacter l'auteur immédiatement.</p>
+
+<p>La dernière révision de ce document est toujours disponible à <a href="http://www.mnot.net/cache_docs/">http://www.mnot.net/cache_docs/</a></p>
+
+<p>Traductions disponibles : <a href="http://www.jakpsatweb.cz/clanky/caching-tutorial-czech-translation.html" hreflang="cz" title="Kešovací návod pro autory webu a webmastery">tchèque</a>.</p>
+
+<p class="version">Version 1.7 &#8212; May 9, 2006</p>
+
+<p class="button"><a href="http://creativecommons.org/licenses/by-nc-nd/2.0/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights.gif"></a></p>
+
+<hx:include src="/templates/footer.html"></hx:include>
+
+</body>
+</html>
