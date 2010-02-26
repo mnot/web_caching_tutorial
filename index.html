@@ -7,7 +7,6 @@
   <link rel="copyright" href="#ABOUT">
   <link rel="disclaimer" href="#ABOUT">
   <link rel="author" href="mailto:mnot@pobox.com">
-  <link rev="made" href="mailto:mnot@pobox.com">
   <link rel="bookmark" href="http://www.mnot.net/cache_docs/" title="Caching Tutorial for Web Authors and Webmasters">
   <link rel="section" href="#DEFINITION" title="What's a Web Cache? Why do people use them?">
   <link rel="section" href="#KINDS" title="Kinds of Web Caches">
@@ -42,7 +41,7 @@ href="#REF">References and Further Information</a> at the end.</p>
 
 
 
-<a id="TOC" name="TOC"></a> 
+<a id="TOC"></a> 
 <ol class="TOC">
   <li class="TOC"><a href="#DEFINITION">What&#8217;s a Web Cache? Why do people use
     them?</a></li>
@@ -103,7 +102,7 @@ google_color_url = "003399";
 </p>
 
 
-<h2><a id="DEFINITION" name="DEFINITION">What&#8217;s a Web Cache? Why do people
+<h2><a id="DEFINITION">What&#8217;s a Web Cache? Why do people
 use them?</a></h2>
 
 <p>A <em>Web cache</em> sits between one or more Web servers (also known as
@@ -126,9 +125,9 @@ instead of asking the origin server for it again.</p>
   requirements lower and more manageable.</li>
 </ul>
 
-<h2><a id="KINDS" name="KINDS">Kinds of Web Caches</a></h2>
+<h2><a id="KINDS">Kinds of Web Caches</a></h2>
 
-<h3><a id="BROWSER" name="BROWSER">Browser Caches</a></h3>
+<h3><a id="BROWSER">Browser Caches</a></h3>
 
 <p>If you examine the preferences dialog of any modern Web browser (like
 Internet Explorer, Safari or Mozilla), you&#8217;ll probably notice a &#8220;cache&#8221;
@@ -144,7 +143,7 @@ navigation images throughout your site, they&#8217;ll be served from browsers&#8
 caches almost instantaneously.</p>
 
 
-<h3><a id="PROXY" name="PROXY">Proxy Caches</a></h3>
+<h3><a id="PROXY">Proxy Caches</a></h3>
 
 <p>Web proxy caches work on the same principle, but a much larger scale.
 Proxies serve hundreds or thousands of users in the same way; large
@@ -165,7 +164,7 @@ of this they are very good at reducing latency and network traffic. That&#8217;s
 because popular representations are reused a number of times.</p>
 
 
-<h3><a id="GATEWAY" name="GATEWAY">Gateway Caches</a></h3>
+<h3><a id="GATEWAY">Gateway Caches</a></h3>
 
 <p>Also known as &#8220;reverse proxy caches&#8221; or &#8220;surrogate caches,&#8221; gateway caches
 are also intermediaries, but instead of being deployed by network
@@ -188,7 +187,7 @@ the information is suitable for those interested in gateway caches as
 well.</p>
 
 
-<h2><a id="WHY" name="WHY">Aren&#8217;t Web Caches bad for me? Why should I help
+<h2><a id="WHY">Aren&#8217;t Web Caches bad for me? Why should I help
 them?</a></h2>
 
 <p>Web caching is one of the most misunderstood technologies on the Internet.
@@ -206,7 +205,7 @@ site cache-unfriendly.</p>
 <em>stale</em>. However, this tutorial can show you how to configure your
 server to control how your content is cached.</p>
 
-<p class="callout right"><acronym title="Content Delivery Networks">CDNs</acronym>
+<p class="callout right"><abbr title="Content Delivery Networks">CDNs</abbr>
 are an interesting development, because unlike many 
 proxy caches, their gateway caches are aligned with the interests of the 
 Web site being cached, so that these problems aren&#8217;t seen. However, even
@@ -231,7 +230,7 @@ or not. If you don&#8217;t configure your site to be cached correctly, it will b
 cached using whatever defaults the cache&#8217;s administrator decides upon.</p>
 
 
-<h2><a id="WORK" name="WORK">How Web Caches Work</a></h2>
+<h2><a id="WORK">How Web Caches Work</a></h2>
 
 <p>All caches have a set of rules that they use to determine when to serve a
 representation from the cache, if it&#8217;s available. Some of these rules are set
@@ -275,7 +274,7 @@ ways that a cache works with content. A fresh representation will be available
 instantly from the cache, while a validated representation will avoid sending
 the entire representation over again if it hasn&#8217;t changed.</p>
 
-<h2><a id="CONTROL" name="CONTROL">How (and how not) to Control
+<h2><a id="CONTROL">How (and how not) to Control
 Caches</a></h2>
 
 <p>There are several tools that Web designers and Webmasters can use to
@@ -284,7 +283,7 @@ a little dirty with your server&#8217;s configuration, but the results are worth
 For details on how to use these tools with your server, see the <a
 href="#IMP-SERVER">Implementation</a> sections below.</p>
 
-<h3><a id="META" name="META">HTML Meta Tags and HTTP Headers</a></h3>
+<h3><a id="META">HTML Meta Tags and HTTP Headers</a></h3>
 
 <p>HTML authors can put tags in a document&#8217;s &lt;HEAD&gt; section that
 describe its attributes. These <em>meta tags</em> are often used in the
@@ -329,7 +328,7 @@ headers.</p>
 
 
 
-<h3><a id="PRAGMA" name="PRAGMA">Pragma HTTP Headers (and why they don&#8217;t
+<h3><a id="PRAGMA">Pragma HTTP Headers (and why they don&#8217;t
 work)</a></h3>
 
 <p>Many people believe that assigning a <code>Pragma: no-cache</code> HTTP header to a
@@ -339,7 +338,7 @@ instead, Pragma request headers (the headers that a browser sends to a server)
 are discussed. Although a few caches may honor this header, the majority
 won&#8217;t, and it won&#8217;t have any effect. Use the headers below instead.</p>
 
-<h3><a id="EXPIRES" name="EXPIRES">Controlling Freshness with the Expires
+<h3><a id="EXPIRES">Controlling Freshness with the Expires
 HTTP Header</a></h3>
 
 <p>The <code>Expires</code> HTTP header is a basic means of controlling caches; it tells
@@ -388,7 +387,7 @@ some content to expire at a particular time. If you don&#8217;t update an <code>
 time before it passes, each and every request will go back to your Web server, 
 increasing load and latency.</p>
 
-<h3><a id="CACHE-CONTROL" name="CACHE-CONTROL">Cache-Control HTTP
+<h3><a id="CACHE-CONTROL">Cache-Control HTTP
 Headers</a></h3>
 
 <p>HTTP 1.1 introduced a new class of headers, <code>Cache-Control</code> response
@@ -431,7 +430,7 @@ to address the limitations of <code>Expires</code>.</p>
 the excellent documentation in HTTP 1.1; see <a
 href="#REF">References and Further Information</a>.</p>
 
-<h3><a id="VALIDATE" name="VALIDATE">Validators and Validation</a></h3>
+<h3><a id="VALIDATE">Validators and Validation</a></h3>
 
 <p class="ad right">
 <script type="text/javascript"><!--
@@ -483,7 +482,7 @@ do anything. However, they don&#8217;t know enough about dynamic content (like C
 ASP or database sites) to generate them; see <a href="#SCRIPT">Writing
 Cache-Aware Scripts</a>.</p>
 
-<h2><a id="TIPS" name="TIPS">Tips for Building a Cache-Aware Site</a></h2>
+<h2><a id="TIPS">Tips for Building a Cache-Aware Site</a></h2>
 
 <p>Besides using freshness information and validation, there are a number of
 other things you can do to make your site more cache-friendly.</p>
@@ -519,7 +518,7 @@ other things you can do to make your site more cache-friendly.</p>
     &#8212; it can help you apply many of the concepts in this tutorial.</li>
 </ul>
 
-<h2><a id="SCRIPT" name="SCRIPT">Writing Cache-Aware Scripts</a></h2>
+<h2><a id="SCRIPT">Writing Cache-Aware Scripts</a></h2>
 
 <p>By default, most scripts won&#8217;t return a validator (a <code>Last-Modified</code>
 or <code>ETag</code> response header) or freshness information (<code>Expires</code> or <code>Cache-Control</code>).
@@ -570,7 +569,7 @@ authentication information or other external criteria, it probably isn&#8217;t.<
 <p>See the <a href="#IMP-SCRIPT">Implementation Notes</a> for more specific
 information.</p>
 
-<h2><a id="FAQ" name="FAQ">Frequently Asked Questions</a></h2>
+<h2><a id="FAQ">Frequently Asked Questions</a></h2>
 
 <h3>What are the most important things to make cacheable?</h3>
 
@@ -722,7 +721,7 @@ representations are kept, and some allow representations to be &#8220;pinned&#82
 cache, so that they&#8217;re always available.</p>
 
 
-<h2><a id="IMP-SERVER" name="IMP-SERVER">Implementation Notes &#8212; Web
+<h2><a id="IMP-SERVER">Implementation Notes &#8212; Web
 Servers</a></h2>
 
 <p>Generally speaking, it&#8217;s best to use the latest version of whatever Web
@@ -739,16 +738,16 @@ distribution.</p>
 
 <p>The modules need to be built into Apache; although they are included in
 the distribution, they are not turned on by default. To find out if the
-modules are enabled in your server, find the httpd binary and run <tt>httpd
--l</tt>; this should print a list of the available modules (note that this only 
-lists compiled-in modules; on later versions of Apache, use <tt>httpd -M</tt> 
+modules are enabled in your server, find the httpd binary and run <code>httpd
+-l</code>; this should print a list of the available modules (note that this only 
+lists compiled-in modules; on later versions of Apache, use <code>httpd -M</code> 
 to include dynamically loaded modules as well). The modules we&#8217;re
 looking for are mod_expires and mod_headers.</p>
 <ul>
   <li>If they aren&#8217;t available, and you have administrative access, you can
     recompile Apache to include them. This can be done either by uncommenting
     the appropriate lines in the Configuration file, or using the
-    <tt>-enable-module=expires</tt> and <tt>-enable-module=headers</tt>
+    <code>-enable-module=expires</code> and <code>-enable-module=headers</code>
     arguments to configure (1.3 or greater). Consult the INSTALL file found
     with the Apache distribution.</li>
 </ul>
@@ -807,9 +806,9 @@ flexible way. Note that this is only possible in version 4 of the server,
 which will run only on NT Server.</p>
 
 <p>To specify headers for an area of a site, select it in the
-<tt>Administration Tools</tt> interface, and bring up its properties. After
-selecting the <tt>HTTP Headers</tt> tab, you should see two interesting
-areas; <tt>Enable Content Expiration</tt> and <tt>Custom HTTP headers</tt>.
+<code>Administration Tools</code> interface, and bring up its properties. After
+selecting the <code>HTTP Headers</code> tab, you should see two interesting
+areas; <code>Enable Content Expiration</code> and <code>Custom HTTP headers</code>.
 The first should be self-explanatory, and the second can be used to apply
 Cache-Control headers.</p>
 
@@ -825,14 +824,14 @@ set Expires headers. However, it has supported HTTP 1.1 features since version
 3.0. This means that HTTP 1.1 caches (proxy and browser) will be able to take
 advantage of Cache-Control settings you make.</p>
 
-<p>To use Cache-Control headers, choose <tt>Content Management | Cache Control
-Directives</tt> in the administration server. Then, using the Resource Picker,
+<p>To use Cache-Control headers, choose <code>Content Management | Cache Control
+Directives</code> in the administration server. Then, using the Resource Picker,
 choose the directory where you want to set the headers. After setting the
 headers, click &#8216;OK&#8217;. For more information, see the <a class="offsite"
 href="http://developer.netscape.com/docs/manuals/enterprise/admnunix/content.htm#1006282">NES manual</a>.</p>
 
 
-<h2><a id="IMP-SCRIPT" name="IMP-SCRIPT">Implementation Notes &#8212; Server-Side
+<h2><a id="IMP-SCRIPT">Implementation Notes &#8212; Server-Side
 Scripting</a></h2>
 
 <p class="callout right">One thing to keep in mind is that it may be easier to set
@@ -853,7 +852,7 @@ until the page is re-downloaded from the server to see it.</p>
 <p>CGI scripts are one of the most popular ways to generate content. You can
 easily append HTTP response headers by adding them before you send the body;
 Most CGI implementations already require you to do this for the
-<tt>Content-Type</tt> header. For instance, in Perl;</p>
+<code>Content-Type</code> header. For instance, in Perl;</p>
 
 <pre class="example">#!/usr/bin/perl
 print "Content-type: text/html\n";
@@ -948,7 +947,7 @@ scripting engine, with support for several Web servers on Windows, Linux and
 several flavors of Unix.</p>
 
 <p>Cold Fusion makes setting arbitrary HTTP headers relatively easy, with the
-<tt><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000270.htm" class="offsite">CFHEADER</a></tt> 
+<code><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000270.htm" class="offsite">CFHEADER</a></code> 
 tag. Unfortunately, their example for setting an <code>Expires</code> header, as below, is a bit misleading.</p>
 
 <pre><span class="example">&lt;CFHEADER NAME="Expires" VALUE="#Now()#"&gt;</span></pre>
@@ -959,9 +958,9 @@ a representation of Cold Fusion&#8217;s Date/Time object. Most clients will eith
 ignore such a value, or convert it to a default, like January 1, 1970.</p>
 
 <p>However, Cold Fusion does provide a date formatting function that will do the job; 
-<tt><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000483.htm" 
-class="offsite">GetHttpTimeSTring</a></tt>. In combination with <tt>
-<a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000437.htm" class="offsite">DateAdd</a></tt>, it’s easy to set Expires dates; 
+<code><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000483.htm" 
+class="offsite">GetHttpTimeSTring</a></code>. In combination with <code>
+<a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000437.htm" class="offsite">DateAdd</a></code>, it’s easy to set Expires dates; 
 here, we set a header to declare that representations of the page expire in one month;</p>
 
 <pre><span class="example">&lt;cfheader name="Expires" value="#GetHttpTimeString(DateAdd('m', 1, Now()))#"&gt;</span></pre>
@@ -1009,7 +1008,7 @@ href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/h
 information.</p>
 
 
-<h2><a id="REF" name="REF">References and Further Information</a></h2>
+<h2><a id="REF">References and Further Information</a></h2>
 
 <h3><a href="http://www.ietf.org/rfc/rfc2616.txt" class="offsite">HTTP 1.1 Specification</a></h3>
 
@@ -1042,7 +1041,7 @@ wrapper around arbitrary CGI scripts.</p>
 
 
 
-<h2><a id="ABOUT" name="ABOUT">About This Document</a></h2>
+<h2><a id="ABOUT">About This Document</a></h2>
 
 <p>This document is Copyright &copy; 1998-2010 Mark Nottingham &lt;<a
 href="mailto:mnot@pobox.com">mnot@pobox.com</a>&gt;.
