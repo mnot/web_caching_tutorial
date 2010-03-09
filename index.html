@@ -828,7 +828,7 @@ advantage of Cache-Control settings you make.</p>
 Directives</code> in the administration server. Then, using the Resource Picker,
 choose the directory where you want to set the headers. After setting the
 headers, click &#8216;OK&#8217;. For more information, see the <a class="offsite"
-href="http://developer.netscape.com/docs/manuals/enterprise/admnunix/content.htm#1006282">NES manual</a>.</p>
+href="http://www.redhat.com/docs/manuals/ent-server/">NES manual</a>.</p>
 
 
 <h2><a id="IMP-SCRIPT">Implementation Notes &#8212; Server-Side
@@ -871,7 +871,7 @@ that if the user hits the &#8216;back&#8217; button, they won&#8217;t be resubmi
 request.</p>
 
 <p>The CGI specification also makes request headers that the client sends
-available in the environment of the script; each header has &#8216;HTTP_&#8217; appended
+available in the environment of the script; each header has &#8216;HTTP_&#8217; prepended
 to its name. So, if a client makes an <code>If-Modified-Since</code> request, it may show
 up like this:</p>
 
@@ -879,7 +879,7 @@ up like this:</p>
 
 <p>See also the <a href="http://www.mnot.net/cgi_buffer/">cgi_buffer</a>
 library, which automatically handles ETag generation and validation,
-<code>Content-Length</code> generation and gzip content-oding for Perl and Python CGI
+<code>Content-Length</code> generation and gzip content-coding for Perl and Python CGI
 scripts with a one-line include. The Python version can also be used to wrap
 arbitrary CGI scripts with.</p>
 
@@ -959,7 +959,7 @@ ignore such a value, or convert it to a default, like January 1, 1970.</p>
 
 <p>However, Cold Fusion does provide a date formatting function that will do the job; 
 <code><a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000483.htm" 
-class="offsite">GetHttpTimeSTring</a></code>. In combination with <code>
+class="offsite">GetHttpTimeString</a></code>. In combination with <code>
 <a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000437.htm" class="offsite">DateAdd</a></code>, it’s easy to set Expires dates; 
 here, we set a header to declare that representations of the page expire in one month;</p>
 
