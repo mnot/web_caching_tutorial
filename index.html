@@ -405,8 +405,9 @@ to address the limitations of <code>Expires</code>.</p>
   <li><strong><code>s-maxage=</code></strong>[seconds] &#8212; similar to <code>max-age</code>, except that it
   only applies to shared (e.g., proxy) caches.</li>
   <li><strong><code>public</code></strong> &#8212; marks authenticated responses as cacheable;
-  normally, if HTTP authentication is required, responses are automatically
-  uncacheable (for shared caches).</li>
+  normally, if HTTP authentication is required, responses are automatically private.</li>
+  <li><strong><code>private</code></strong> &#8212; allows caches that are specific to one user (e.g., in a 
+	browser) to store the response; shared caches (e.g., in a proxy) may not.</li> 
   <li><strong><code>no-cache</code></strong> &#8212; forces caches to submit the request to the
   origin server for validation before releasing a cached copy, every time.
   This is useful to assure that authentication is respected (in combination
@@ -1069,7 +1070,7 @@ href="http://www.mnot.net/cache_docs/">http://www.mnot.net/cache_docs/</a></p>
 	<a href="index.fr.html" hreflang="fr" title="Un tutoriel de la mise en cache">French</a>.
 </p>
 
-<p class="version">March 9, 2010</p>
+<p class="version">April 9, 2010</p>
 
 <p class="button"><a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a></p>
 
