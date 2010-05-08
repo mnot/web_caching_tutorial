@@ -987,12 +987,7 @@ time, you can use the properties of the <code>Response</code> object;</p>
 <pre><span class="example">&lt;% Response.Expires=1440 %&gt;</span></pre>
 
 <p>specifying the number of minutes from the request to expire the
-representation. Likewise, absolute expiry time can be set like this (make sure
-you format HTTP date correctly):</p>
-
-<pre><span class="example">&lt;% Response.ExpiresAbsolute=#May 31,1996 13:30:15 GMT# %&gt;</span></pre>
-
-<p><code>Cache-Control</code> headers can be added like this:</p>
+representation. <code>Cache-Control</code> headers can be added like this:</p>
 
 <pre><span class="example">&lt;% Response.CacheControl="public" %&gt;</span></pre>
 
