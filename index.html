@@ -873,10 +873,8 @@ request.</p>
 
 <p>The CGI specification also makes request headers that the client sends
 available in the environment of the script; each header has &#8216;HTTP_&#8217; prepended
-to its name. So, if a client makes an <code>If-Modified-Since</code> request, it may show
-up like this:</p>
-
-<pre><span class="example">HTTP_IF_MODIFIED_SINCE = Fri, 30 Oct 1998 14:19:41 GMT </span></pre>
+to its name. So, if a client makes an <code>If-Modified-Since</code> request, it will show
+up as <code>HTTP_IF_MODIFIED_SINCE</code>.</p>
 
 <p>See also the <a href="http://www.mnot.net/cgi_buffer/">cgi_buffer</a>
 library, which automatically handles ETag generation and validation,
@@ -964,7 +962,8 @@ class="offsite">GetHttpTimeString</a></code>. In combination with <code>
 <a href="http://livedocs.macromedia.com/coldfusion/7/htmldocs/00000437.htm" class="offsite">DateAdd</a></code>, it’s easy to set Expires dates; 
 here, we set a header to declare that representations of the page expire in one month;</p>
 
-<pre><span class="example">&lt;cfheader name="Expires" value="#GetHttpTimeString(DateAdd('m', 1, Now()))#"&gt;</span></pre>
+<pre class="example">&lt;cfheader name="Expires" 
+  value="#GetHttpTimeString(DateAdd('m', 1, Now()))#"&gt;</pre>
 
 <p>You can also use the <code>CFHEADER</code> tag to set <code>Cache-Control: max-age</code> and other headers.</p>
 
