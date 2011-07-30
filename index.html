@@ -290,11 +290,11 @@ describe its attributes. These <em>meta tags</em> are often used in the
 belief that they can mark a document as uncacheable, or expire it at a
 certain time.</p>
 
-<p>Meta tags are easy to use, but aren&#8217;t very effective. That&#8217;s because
-they&#8217;re only honored by a few browser caches (which actually read the HTML),
-not proxy caches (which almost never read the HTML in the document). While it
-may be tempting to put a Pragma: no-cache meta tag into a Web page, it won&#8217;t
-necessarily cause it to be kept fresh.</p>
+<p>Meta tags are easy to use, but aren&#8217;t very effective. That&#8217;s
+because they&#8217;re not honored by proxy caches (which almost never read the
+HTML in the document). In fact, they're not even used by many browser caches!
+While it may be tempting to put a Pragma: no-cache meta tag into a Web page,
+it won&#8217;t necessarily cause it to be kept fresh.</p>
 
 <p class="callout right">If your site is hosted at an ISP or hosting farm and they
 don&#8217;t give you the ability to set arbitrary HTTP headers (like <code>Expires</code> and
