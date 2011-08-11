@@ -427,9 +427,11 @@ to address the limitations of <code>Expires</code>.</p>
 <p>For example:</p>
 <pre><span class="example">Cache-Control: max-age=3600, must-revalidate</span></pre>
 
-<p>If you plan to use the <code>Cache-Control</code> headers, you should have a look at
-the excellent documentation in HTTP 1.1; see <a
-href="#REF">References and Further Information</a>.</p>
+<p>When both <code>Cache-Control</code> and <code>Expires</code> are present,
+<code>Cache-Control</code> takes precedence. If you plan to use the
+<code>Cache-Control</code> headers, you should have a look at the excellent
+documentation in HTTP 1.1; see <a href="#REF">References and Further
+Information</a>.</p>
 
 <h3><a id="VALIDATE">Validators and Validation</a></h3>
 
