@@ -476,8 +476,7 @@ the representation does. Because the server controls how the ETag is
 generated, caches can be surer that if the ETag matches when they make a
 <code>If-None-Match</code> request, the representation really is the same.</p>
 
-<p>Almost all caches use Last-Modified times in determining if an
-representation is fresh; ETag validation is also becoming prevalent.</p>
+<p>Almost all caches use Last-Modified times as validators; ETag validation is also becoming prevalent.</p>
 
 <p>Most modern Web servers will generate both <code>ETag</code> and <code>Last-Modified</code>
 headers to use as validators for static content (i.e., files) automatically; you won&#8217;t have to
