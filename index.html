@@ -260,7 +260,7 @@ below):</p>
     </ul>
     Fresh representations are served directly from the cache, without checking
     with the origin server.</li>
-  <li>If an representation is stale, the origin server will be asked to
+  <li>If a representation is stale, the origin server will be asked to
   <em>validate</em> it, or tell the cache whether the copy that it has is
   still good.</li>
   <li>Under certain circumstances &#8212; for example, when it&#8217;s disconnected from a network &#8212;
@@ -400,7 +400,7 @@ to address the limitations of <code>Expires</code>.</p>
 
 <ul>
   <li><strong><code>max-age=</code></strong>[seconds] &#8212; specifies the maximum amount of
-  time that an representation will be considered fresh. Similar to <code>Expires</code>,
+  time that a representation will be considered fresh. Similar to <code>Expires</code>,
   this directive is relative to the time of the request, rather than absolute.
   [seconds] is the number of seconds from the time of the request you wish the
   representation to be fresh for.</li>
@@ -458,7 +458,7 @@ google_color_url = "003399";
 </p -->
 
 <p>In <a href="#WORK">How Web Caches Work</a>, we said that validation is used
-by servers and caches to communicate when an representation has changed. By
+by servers and caches to communicate when a representation has changed. By
 using it, caches avoid having to download the entire representation when they
 already have a copy locally, but they&#8217;re not sure if it&#8217;s still fresh.</p>
 
@@ -688,7 +688,7 @@ well. Because of this, it&#8217;s best to make static images and similar
 representations very cacheable, while keeping the HTML pages that refer to
 them on a tight leash.</p>
 
-<p>If you want to reload an representation from a specific cache, you can
+<p>If you want to reload a representation from a specific cache, you can
 either force a reload (in Firefox, holding down shift while pressing &#8216;reload&#8217;
 will do this by issuing a <code>Pragma: no-cache</code> request header) while using the
 cache. Or, you can have the cache administrator delete the representation
