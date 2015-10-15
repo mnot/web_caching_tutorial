@@ -1,14 +1,14 @@
 GZIP = gzip
 
 .PHONY: all
-all : index.gz.html htaccess
+all : index.gzip.html htaccess
 
-%.gz.html %.gz.css %.gz.js : %.html
+%.gzip.html %.gzip.css %.gzip.js : %.html
 	$(GZIP) -cn9 $< > $@
 
 .PHONY: clean
 clean :
-	rm *.gz.html *.gz.css *.gz.js
+	rm *.gzip.html *.gzip.css *.gzip.js
 
 .PHONY: htaccess
 htaccess :
