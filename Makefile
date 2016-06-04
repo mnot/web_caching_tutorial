@@ -1,15 +1,17 @@
 GZIP = gzip
+BROTLI = bro
 
 .PHONY: all
-all : index.gzip.html htaccess
+all : index.html.gzip index.html.brotli index.fr.html.gzip index.fr.html.brotli
 
-%.gzip.html %.gzip.css %.gzip.js : %.html
+%.html.gzip : %.html
 	$(GZIP) -cn9 $< > $@
+
+%.html.brotli : %.html
+	$(BROTLI) --force --input $< --output $@
+	chmod a+r $@
 
 .PHONY: clean
 clean :
 	rm *.gzip.html *.gzip.css *.gzip.js
 
-.PHONY: htaccess
-htaccess :
-	if [ ! -f .htaccess ] || [ `grep -sc "Multiviews" .htaccess` = 0 ] ; then echo "Options +Multiviews" >> .htaccess; fi
