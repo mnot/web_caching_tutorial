@@ -471,9 +471,6 @@ other things you can do to make your site more cache-friendly.</p>
   <li><strong>Use cookies only where necessary</strong> &#8212; cookies are
     difficult to cache, and aren&#8217;t needed in most situations. If you must use
     a cookie, limit its use to dynamic pages.</li>
-  <li><strong>Minimize use of SSL</strong> &#8212; because encrypted pages are not
-    stored by shared caches, use them only when you have to, and use images
-    on SSL pages sparingly.</li>
   <li><strong>Check your pages with <a href="https://redbot.org/">REDbot</a></strong>
     &#8212; it can help you apply many of the concepts in this tutorial.</li>
 </ul>
@@ -607,8 +604,8 @@ way, those images will be naturally cacheable.</p>
 <h3>Should I worry about security if people access my site through a
 cache?</h3>
 
-<p>SSL pages are not cached (or decrypted) by proxy caches, so you don&#8217;t have
-to worry about that. However, because caches store non-SSL requests and URLs
+<p><code>https://</code> pages are not cached (or decrypted) by proxy caches, so you don&#8217;t have
+to worry about that. However, because caches store <code>http://</code> responses and URLs
 fetched through them, you should be conscious about unsecured sites; an
 unscrupulous administrator could conceivably gather information about their
 users, especially in the URL.</p>
