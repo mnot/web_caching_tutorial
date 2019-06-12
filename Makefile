@@ -1,5 +1,5 @@
 GZIP = gzip
-BROTLI = bro
+BROTLI = brotli
 
 .PHONY: all
 all : index.html.gzip index.html.brotli index.fr.html.gzip index.fr.html.brotli
