@@ -8,8 +8,8 @@ all : index.html.gzip index.html.brotli index.fr.html.gzip index.fr.html.brotli
 	$(GZIP) -cn9 $< > $@
 
 %.html.brotli : %.html
-	$(BROTLI) --force --input $< --output $@
-	chmod a+r $@
+	$(BROTLI) --force --output=$@ $<
+#	chmod a+r $@
 
 .PHONY: clean
 clean :
